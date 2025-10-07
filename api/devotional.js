@@ -95,7 +95,7 @@ function findBookByName(name) {
   ) || null;
 }
 
-async function fetchVerseByBookNumber(versionId, bookNumber, chapter, verse) {
+async function fetchVerseByBookNumber(TRANSLATION_IDS, bookNumber, chapter, verse) {
   try {
     const booksResponse = await fetch(`${BIBLE_API_BASE}/bibles/${versionId}/books`, {
       headers: { 'api-key': BIBLE_API_KEY },
