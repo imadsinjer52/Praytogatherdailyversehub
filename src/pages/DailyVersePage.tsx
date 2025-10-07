@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, Loader2, Heart, MessageCircle, Calendar, ChevronDown, ChevronUp, RefreshCw, ExternalLink } from 'lucide-react';
+import { BookOpen, Loader2, Heart, MessageCircle, Calendar, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { formatCopyText } from '../utils/copyToClipboard';
 import { getTodayDevotional } from '../utils/devotionalApi';
 import { saveVerse, getRecentVerses, getTodayVerse } from '../utils/verseStorage';
@@ -37,6 +37,7 @@ export default function DailyVersePage() {
   const [error, setError] = useState<string | null>(null);
   const [reflectionText, setReflectionText] = useState('');
   
+  // Translation states
   const [arabicVerse, setArabicVerse] = useState<string | null>(null);
   const [germanVerse, setGermanVerse] = useState<string | null>(null);
   const [loadingArabic, setLoadingArabic] = useState(false);
@@ -126,12 +127,14 @@ export default function DailyVersePage() {
         return;
       }
 
+      // Find the book by English name
       const book = findBookByName(parsed.bookName);
       if (!book) {
         setArabicVerse('Book not found');
         return;
       }
 
+      // Use Arabic book name for fetching
       const verse = await fetchVerseByReference(
         TRANSLATION_IDS.arabic,
         book.arabicName,
@@ -159,12 +162,14 @@ export default function DailyVersePage() {
         return;
       }
 
+      // Find the book by English name
       const book = findBookByName(parsed.bookName);
       if (!book) {
         setGermanVerse('Book not found');
         return;
       }
 
+      // Use German book name for fetching
       const verse = await fetchVerseByReference(
         TRANSLATION_IDS.german,
         book.germanName,
@@ -210,47 +215,6 @@ export default function DailyVersePage() {
     return verse.versionEn;
   };
 
-  const getChatGPTPrompt = () => {
-    if (!todayVerse) return '';
-    
-    if (language === 'ar') {
-      return `الآية: ${todayVerse.reference}\nاكتب تأملاً (4-6 جمل) حول هذه الآية:\n- أظهر كيف تشير الآية إلى يسوع المسيح والإنجيل.\n- أوضح كيف تكشف هذه الآية قلب الله.\n- اجعل التأمل عملياً لحياة المؤمن اليومية.\n- شجّع على تعميق الإيمان والثقة بالله.\n- تجنّب أي لهجة لاهوتية طائفية.\n\nبعد ذلك، اكتب 2-3 أسئلة عميقة تساعد القارئ على الصلاة بهذه الآية من قلبه`;
-    } else if (language === 'de') {
-      return `Schreibe eine Reflexion (4–6 Sätze) über diesen Bibelvers: ${todayVerse.reference}\n- Zeige, wie der Vers auf Jesus Christus und das Evangelium hinweist.\n- Erkläre, wie dieser Vers Gottes Herz offenbart.\n- Mache die Reflexion praktisch für das tägliche christliche Leben.\n- Ermutige zu tieferem Glauben und Vertrauen in Gott.\n- Vermeide konfessionelle Theologie.\n\nSchreibe anschließend 2–3 nachdenkliche Fragen, die dem Leser helfen, diesen Vers persönlich im Gebet zu bewegen.`;
-    } else {
-      return `Write a Reflection (4–6 sentences) on this Bible verse: ${todayVerse.reference}\n- Point to Jesus Christ and the Gospel.\n- Show how the verse reveals God's heart.\n- Make it practical for daily Christian living.\n- Encourage deeper faith and trust in God.\n- Avoid denominational theology.\n\nThen, write 2–3 thoughtful questions to help the reader pray this verse from their heart.`;
-    }
-  };
-
-  const getChatGPTLink = () => {
-    const prompt = getChatGPTPrompt();
-    return `https://chat.openai.com/?q=${encodeURIComponent(prompt)}`;
-  };
-
-  const formatArabicCopy = () => {
-    if (!todayVerse || !arabicVerse) return '';
-    return `Pray with us! https://pray-to-gather.base44.app\n\n${todayVerse.reference}\n"${arabicVerse}"\n\n${todayVerse.reflectionAr}\n\n${todayVerse.prayerAr}`;
-  };
-
-  const formatGermanCopy = () => {
-    if (!todayVerse || !germanVerse) return '';
-    return `Pray with us! https://pray-to-gather.base44.app\n\n${todayVerse.reference}\n"${germanVerse}"\n\n${todayVerse.reflectionDe}\n\n${todayVerse.prayerDe}`;
-  };
-
-  const formatVerseAndReflectionCopy = () => {
-    if (!todayVerse) return '';
-    const currentVerseText = getVerseText(todayVerse);
-    const currentReflection = getReflection(todayVerse);
-    const currentPrayer = getPrayer(todayVerse);
-    return `Pray with us! https://pray-to-gather.base44.app\n\n${todayVerse.reference}\n"${currentVerseText}"\n\n${currentReflection}\n\n${currentPrayer}`;
-  };
-
-  const formatUserReflectionCopy = () => {
-    if (!todayVerse) return '';
-    const currentVerseText = getVerseText(todayVerse);
-    return `Pray with us! https://pray-to-gather.base44.app\n\n${todayVerse.reference}\n"${currentVerseText}"\n\n${reflectionText}`;
-  };
-
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -275,7 +239,12 @@ export default function DailyVersePage() {
   }
 
   const currentVerseText = getVerseText(todayVerse);
+  const currentReflection = getReflection(todayVerse);
+  const currentPrayer = getPrayer(todayVerse);
   const currentVersion = getVersion(todayVerse);
+
+  const fullContent = `${currentReflection}\n\n${currentPrayer}`;
+  const copyText = formatCopyText(currentVerseText, todayVerse.reference, fullContent);
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -376,11 +345,6 @@ export default function DailyVersePage() {
                 <p className="text-sm text-blue-600 mt-2 text-left">
                   {todayVerse.reference} (Arabic)
                 </p>
-                <CopyButton 
-                  text={formatArabicCopy()} 
-                  label="Copy Arabic Verse" 
-                  className="w-full mt-3" 
-                />
               </div>
             )}
           </div>
@@ -417,44 +381,38 @@ export default function DailyVersePage() {
                 <p className="text-sm text-green-600 mt-2 text-right">
                   {todayVerse.reference} (Elberfelder)
                 </p>
-                <CopyButton 
-                  text={formatGermanCopy()} 
-                  label="Copy German Verse" 
-                  className="w-full mt-3" 
-                />
               </div>
             )}
           </div>
 
           <div className="space-y-3">
-            <CopyButton 
-              text={formatVerseAndReflectionCopy()} 
-              label={language === 'ar' ? 'نسخ الآية والتأمل' : language === 'de' ? 'Vers & Reflexion kopieren' : 'Copy Verse & Reflection'} 
-              className="w-full" 
-            />
+            <CopyButton text={copyText} label={language === 'ar' ? 'نسخ الآية والتأمل' : language === 'de' ? 'Vers & Reflexion kopieren' : 'Copy Verse & Reflection'} className="w-full" />
             <ReadInContext verseReference={todayVerse.reference} language={language} />
           </div>
         </div>
 
-        {/* Daily Reflection with ChatGPT Link */}
         <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-md p-6 md:p-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <Heart className="w-5 h-5 text-blue-600" />
-              <h3 className="text-lg font-bold text-gray-800">
-                {language === 'ar' ? 'التأمل اليومي' : language === 'de' ? 'Tägliche Reflexion' : 'Daily Reflection'}
-              </h3>
-            </div>
-            <a
-              href={getChatGPTLink()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-sm"
-            >
-              <ExternalLink className="w-4 h-4" />
-              <span>{language === 'ar' ? 'تأمل مع ChatGPT' : language === 'de' ? 'Mit ChatGPT reflektieren' : 'Reflect with ChatGPT'}</span>
-            </a>
+          <div className="flex items-center gap-3 mb-4">
+            <Heart className="w-5 h-5 text-blue-600" />
+            <h3 className="text-lg font-bold text-gray-800">
+              {language === 'ar' ? 'التأمل اليومي' : language === 'de' ? 'Tägliche Reflexion' : 'Daily Reflection'}
+            </h3>
           </div>
+          <p className={`text-gray-700 leading-relaxed whitespace-pre-line ${language === 'ar' ? 'text-right' : ''}`}>
+            {currentReflection}
+          </p>
+        </div>
+
+        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-md p-6 md:p-8">
+          <div className="flex items-center gap-3 mb-4">
+            <MessageCircle className="w-5 h-5 text-green-600" />
+            <h3 className="text-lg font-bold text-gray-800">
+              {language === 'ar' ? 'الصلاة اليومية' : language === 'de' ? 'Tägliches Gebet' : 'Daily Prayer'}
+            </h3>
+          </div>
+          <p className={`text-gray-700 leading-relaxed whitespace-pre-line ${language === 'ar' ? 'text-right' : ''}`}>
+            {currentPrayer}
+          </p>
         </div>
 
         <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
@@ -469,7 +427,7 @@ export default function DailyVersePage() {
           />
           <div className="flex flex-col sm:flex-row gap-3">
             <CopyButton
-              text={formatUserReflectionCopy()}
+              text={formatCopyText(currentVerseText, todayVerse.reference, reflectionText)}
               label={language === 'ar' ? 'نسخ التأمل' : language === 'de' ? 'Reflexion kopieren' : 'Copy Reflection'}
               className="flex-1"
             />
@@ -506,7 +464,10 @@ export default function DailyVersePage() {
             {recentVerses.slice(1).map((verse, index) => {
               const verseText = getVerseText(verse);
               const reflection = getReflection(verse);
+              const prayer = getPrayer(verse);
               const version = getVersion(verse);
+              const content = `${reflection}\n\n${prayer}`;
+              const verseCopyText = formatCopyText(verseText, verse.reference, content);
 
               return (
                 <div key={index} className="bg-white rounded-xl shadow-md p-6">
@@ -526,14 +487,20 @@ export default function DailyVersePage() {
                     {verse.reference} ({version})
                   </p>
 
-                  <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                  <div className="bg-blue-50 rounded-lg p-4 mb-3">
                     <p className={`text-sm text-gray-700 leading-relaxed ${language === 'ar' ? 'text-right' : ''}`}>
                       {reflection.slice(0, 200)}...
                     </p>
                   </div>
 
+                  <div className="bg-green-50 rounded-lg p-4 mb-4">
+                    <p className={`text-sm text-gray-700 leading-relaxed ${language === 'ar' ? 'text-right' : ''}`}>
+                      {prayer.slice(0, 150)}...
+                    </p>
+                  </div>
+
                   <CopyButton
-                    text={`Pray with us! https://pray-to-gather.base44.app\n\n${verse.reference}\n"${verseText}"\n\n${reflection}`}
+                    text={verseCopyText}
                     label={language === 'ar' ? 'نسخ' : language === 'de' ? 'Kopieren' : 'Copy'}
                     className="w-full"
                   />
