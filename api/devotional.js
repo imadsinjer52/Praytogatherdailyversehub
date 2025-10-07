@@ -294,8 +294,8 @@ export default async function handler(req, res) {
     let verseTextDe = null;
 
     if (parsedRef) {
-      verseTextAr = await fetchVerseByBookNumber(TRANSLATION_IDS.arabic, parsedRef.book.arabicName, parsedRef.chapter, parsedRef.verse);
-      verseTextDe = await fetchVerseByBookNumber(TRANSLATION_IDS.german, parsedRef.book.germanName, parsedRef.chapter, parsedRef.verse);
+      verseTextAr = await fetchVerseByBookNumber(TRANSLATION_IDS.arabic, parsedRef.book.number, parsedRef.chapter, parsedRef.verse);
+      verseTextDe = await fetchVerseByBookNumber(TRANSLATION_IDS.german, parsedRef.book.number, parsedRef.chapter, parsedRef.verse);
     }
 
     const devotionals = await generateAllDevotionals(verseTextEn, verseTextAr, verseTextDe, reference);
