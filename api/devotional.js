@@ -313,7 +313,7 @@ export default async function handler(req, res) {
       prayer_ar: devotionals.prayerAr,
       prayer_de: devotionals.prayerDe,
       version_en: versionEn,
-      version_ar: 'Arabic, Standard',
+      version_ar: 'Arabic',
       version_de: 'Elberfelder',
     };
 
