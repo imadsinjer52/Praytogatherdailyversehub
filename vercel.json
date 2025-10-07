@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "GEMINI_API_KEY": "gen-lang-client-0414822769",
+    "SUPABASE_URL": "https://smlthwtofcbcwbhnyivn.supabase.co",
+    "SUPABASE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtbHRod3RvZmNiY3diaG55aXZuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTY5OTk0MywiZXhwIjoyMDc1Mjc1OTQzfQ.sLqRbdf4e-hYziVo0vQKc2yimaYufsS95Uk-v_NoGzg"
+  }
+}

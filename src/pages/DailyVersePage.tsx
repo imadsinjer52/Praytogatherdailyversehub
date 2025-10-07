@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { BookOpen, Loader2, Heart, MessageCircle, Calendar } from 'lucide-react';
 import { formatCopyText } from '../utils/copyToClipboard';
-import { generateReflection, generatePrayer } from '../utils/aiGenerator';
+import { getTodayDevotional } from '../utils/devotionalApi';
 import { saveVerse, getRecentVerses, getTodayVerse } from '../utils/verseStorage';
-import { fetchVerseByReference, parseVerseReference, TRANSLATION_IDS } from '../utils/bibleApi';
 import CopyButton from '../components/CopyButton';
 import GoDeeperSection from '../components/GoDeeperSection';
 import DiveInTheWord from '../components/DiveInTheWord';
@@ -56,49 +55,27 @@ export default function DailyVersePage() {
         return;
       }
 
-      const response = await fetch('https://beta.ourmanna.com/api/v1/get/?format=json');
-      if (!response.ok) throw new Error('Failed to fetch daily verse');
+      const devotional = await getTodayDevotional();
 
-      const data = await response.json();
-      const reference = data.verse.details.reference;
-      const verseTextEn = data.verse.details.text;
-      const versionEn = data.verse.details.version;
-
-      const parsedRef = parseVerseReference(reference);
-      let verseTextAr = null;
-      let verseTextDe = null;
-
-      if (parsedRef) {
-        const arVerse = await fetchVerseByReference(TRANSLATION_IDS.arabic, parsedRef.book, parsedRef.chapter, parsedRef.verse);
-        const deVerse = await fetchVerseByReference(TRANSLATION_IDS.german, parsedRef.book, parsedRef.chapter, parsedRef.verse);
-
-        verseTextAr = arVerse;
-        verseTextDe = deVerse;
+      if (!devotional) {
+        throw new Error('Failed to fetch daily devotional');
       }
 
-      const reflectionEn = await generateReflection(verseTextEn, reference, 'en');
-      const reflectionAr = await generateReflection(verseTextAr || verseTextEn, reference, 'ar');
-      const reflectionDe = await generateReflection(verseTextDe || verseTextEn, reference, 'de');
-
-      const prayerEn = await generatePrayer(verseTextEn, reference, 'en');
-      const prayerAr = await generatePrayer(verseTextAr || verseTextEn, reference, 'ar');
-      const prayerDe = await generatePrayer(verseTextDe || verseTextEn, reference, 'de');
-
       const newVerse: DailyVerseData = {
-        date: new Date().toISOString().split('T')[0],
-        reference,
-        verseTextEn,
-        verseTextAr,
-        verseTextDe,
-        reflectionEn,
-        reflectionAr,
-        reflectionDe,
-        prayerEn,
-        prayerAr,
-        prayerDe,
-        versionEn,
-        versionAr: 'Arabic, Standard',
-        versionDe: 'Elberfelder',
+        date: devotional.date,
+        reference: devotional.verse_reference,
+        verseTextEn: devotional.verse_text_en,
+        verseTextAr: devotional.verse_text_ar,
+        verseTextDe: devotional.verse_text_de,
+        reflectionEn: devotional.reflection_en,
+        reflectionAr: devotional.reflection_ar,
+        reflectionDe: devotional.reflection_de,
+        prayerEn: devotional.prayer_en,
+        prayerAr: devotional.prayer_ar,
+        prayerDe: devotional.prayer_de,
+        versionEn: devotional.version_en,
+        versionAr: devotional.version_ar,
+        versionDe: devotional.version_de,
       };
 
       saveVerse(newVerse);
@@ -238,7 +215,10 @@ export default function DailyVersePage() {
             </p>
           </div>
 
-          <CopyButton text={copyText} label={language === 'ar' ? 'نسخ الآية والتأمل' : language === 'de' ? 'Vers & Reflexion kopieren' : 'Copy Verse & Reflection'} className="w-full" />
+          <div className="space-y-3">
+            <CopyButton text={copyText} label={language === 'ar' ? 'نسخ الآية والتأمل' : language === 'de' ? 'Vers & Reflexion kopieren' : 'Copy Verse & Reflection'} className="w-full" />
+            <ReadInContext verseReference={todayVerse.reference} language={language} />
+          </div>
         </div>
 
         <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-md p-6 md:p-8">

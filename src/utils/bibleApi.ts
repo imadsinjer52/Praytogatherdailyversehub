@@ -179,7 +179,14 @@ export async function fetchVerseByReference(
     if (!matchingChapter) return null;
 
     const result = await fetchVerseRange(versionId, matchingChapter.id, verse, verse);
-    return result?.content || null;
+    if (!result?.content) return null;
+
+    const cleanContent = result.content
+      .replace(/^\[\d+\]\s*/, '')
+      .replace(/\s*\[\d+\]\s*/g, ' ')
+      .trim();
+
+    return cleanContent;
   } catch (err) {
     console.error('Error fetching verse by reference:', err);
     return null;
