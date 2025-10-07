@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, Loader2, Heart, MessageCircle, Calendar } from 'lucide-react';
+import { BookOpen, Loader2, Heart, MessageCircle, Calendar, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { formatCopyText } from '../utils/copyToClipboard';
 import { getTodayDevotional } from '../utils/devotionalApi';
 import { saveVerse, getRecentVerses, getTodayVerse } from '../utils/verseStorage';
+import { fetchVerseByReference, parseVerseReference, TRANSLATION_IDS } from '../utils/bibleApi';
 import CopyButton from '../components/CopyButton';
 import GoDeeperSection from '../components/GoDeeperSection';
 import DiveInTheWord from '../components/DiveInTheWord';
@@ -34,6 +35,14 @@ export default function DailyVersePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reflectionText, setReflectionText] = useState('');
+  
+  // Translation states
+  const [arabicVerse, setArabicVerse] = useState<string | null>(null);
+  const [germanVerse, setGermanVerse] = useState<string | null>(null);
+  const [loadingArabic, setLoadingArabic] = useState(false);
+  const [loadingGerman, setLoadingGerman] = useState(false);
+  const [showArabic, setShowArabic] = useState(true);
+  const [showGerman, setShowGerman] = useState(true);
 
   useEffect(() => {
     loadDailyVerse();
@@ -41,6 +50,13 @@ export default function DailyVersePage() {
 
   useEffect(() => {
     loadRecentVerses();
+  }, [todayVerse]);
+
+  useEffect(() => {
+    if (todayVerse) {
+      fetchArabicTranslation();
+      fetchGermanTranslation();
+    }
   }, [todayVerse]);
 
   const loadDailyVerse = async () => {
@@ -85,6 +101,52 @@ export default function DailyVersePage() {
       console.error('Error fetching verse:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchArabicTranslation = async () => {
+    if (!todayVerse) return;
+    
+    setLoadingArabic(true);
+    try {
+      const parsed = parseVerseReference(todayVerse.reference);
+      if (parsed) {
+        const verse = await fetchVerseByReference(
+          TRANSLATION_IDS.arabic,
+          parsed.book,
+          parsed.chapter,
+          parsed.verse
+        );
+        setArabicVerse(verse || 'Arabic translation not available');
+      }
+    } catch (err) {
+      console.error('Error fetching Arabic translation:', err);
+      setArabicVerse('Error loading Arabic translation');
+    } finally {
+      setLoadingArabic(false);
+    }
+  };
+
+  const fetchGermanTranslation = async () => {
+    if (!todayVerse) return;
+    
+    setLoadingGerman(true);
+    try {
+      const parsed = parseVerseReference(todayVerse.reference);
+      if (parsed) {
+        const verse = await fetchVerseByReference(
+          TRANSLATION_IDS.german,
+          parsed.book,
+          parsed.chapter,
+          parsed.verse
+        );
+        setGermanVerse(verse || 'German translation not available');
+      }
+    } catch (err) {
+      console.error('Error fetching German translation:', err);
+      setGermanVerse('Error loading German translation');
+    } finally {
+      setLoadingGerman(false);
     }
   };
 
@@ -213,6 +275,78 @@ export default function DailyVersePage() {
             <p className={`text-blue-600 font-semibold ${language === 'ar' ? 'text-left' : 'text-right'}`}>
               {todayVerse.reference} ({currentVersion})
             </p>
+          </div>
+
+          {/* Arabic Translation Section */}
+          <div className="mb-4 border-t pt-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={fetchArabicTranslation}
+                  disabled={loadingArabic}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all disabled:opacity-50"
+                >
+                  {loadingArabic ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4" />
+                  )}
+                  <span className="font-medium">Arabic Translation</span>
+                </button>
+              </div>
+              <button
+                onClick={() => setShowArabic(!showArabic)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-all"
+              >
+                {showArabic ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+              </button>
+            </div>
+            {showArabic && arabicVerse && (
+              <div className="bg-blue-50 rounded-lg p-4 mt-2">
+                <p className="text-lg text-gray-800 leading-relaxed text-right" dir="rtl">
+                  "{arabicVerse}"
+                </p>
+                <p className="text-sm text-blue-600 mt-2 text-left">
+                  {todayVerse.reference} (Arabic)
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* German Translation Section */}
+          <div className="mb-6 border-t pt-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={fetchGermanTranslation}
+                  disabled={loadingGerman}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-all disabled:opacity-50"
+                >
+                  {loadingGerman ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4" />
+                  )}
+                  <span className="font-medium">German Translation</span>
+                </button>
+              </div>
+              <button
+                onClick={() => setShowGerman(!showGerman)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-all"
+              >
+                {showGerman ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+              </button>
+            </div>
+            {showGerman && germanVerse && (
+              <div className="bg-green-50 rounded-lg p-4 mt-2">
+                <p className="text-lg text-gray-800 leading-relaxed">
+                  "{germanVerse}"
+                </p>
+                <p className="text-sm text-green-600 mt-2 text-right">
+                  {todayVerse.reference} (Elberfelder)
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="space-y-3">
