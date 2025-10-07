@@ -229,14 +229,14 @@ export default function DailyVersePage() {
 
   const formatArabicCopy = () => {
     if (!todayVerse || !arabicVerse) return '';
-    return `Pray with us! https://pray-to-gather.base44.app\n\n${todayVerse.reference}\n"${arabicVerse}"`;
+    return `Pray with us! https://pray-to-gather.base44.app\n\n${todayVerse.reference}\n"${arabicVerse}"\n\n${todayVerse.reflectionAr}\n\n${todayVerse.prayerAr}`;
   };
 
   const formatGermanCopy = () => {
     if (!todayVerse || !germanVerse) return '';
-    return `Pray with us! https://pray-to-gather.base44.app\n\n${todayVerse.reference}\n"${germanVerse}"`;
+    return `Pray with us! https://pray-to-gather.base44.app\n\n${todayVerse.reference}\n"${germanVerse}"\n\n${todayVerse.reflectionDe}\n\n${todayVerse.prayerDe}`;
   };
-  
+
   const formatVerseAndReflectionCopy = () => {
     if (!todayVerse) return '';
     const currentVerseText = getVerseText(todayVerse);
@@ -244,7 +244,7 @@ export default function DailyVersePage() {
     const currentPrayer = getPrayer(todayVerse);
     return `Pray with us! https://pray-to-gather.base44.app\n\n${todayVerse.reference}\n"${currentVerseText}"\n\n${currentReflection}\n\n${currentPrayer}`;
   };
-  
+
   const formatUserReflectionCopy = () => {
     if (!todayVerse) return '';
     const currentVerseText = getVerseText(todayVerse);
