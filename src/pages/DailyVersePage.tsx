@@ -3,7 +3,8 @@ import { BookOpen, Loader2, Heart, MessageCircle, Calendar, ChevronDown, Chevron
 import { formatCopyText } from '../utils/copyToClipboard';
 import { getTodayDevotional } from '../utils/devotionalApi';
 import { saveVerse, getRecentVerses, getTodayVerse } from '../utils/verseStorage';
-import { fetchVerseByReference, parseVerseReference, TRANSLATION_IDS } from '../utils/bibleApi';
+import { fetchVerseByReference, TRANSLATION_IDS } from '../utils/bibleApi';
+import { findBookByName } from '../utils/bibleBooks';
 import CopyButton from '../components/CopyButton';
 import GoDeeperSection from '../components/GoDeeperSection';
 import DiveInTheWord from '../components/DiveInTheWord';
@@ -59,6 +60,17 @@ export default function DailyVersePage() {
     }
   }, [todayVerse]);
 
+  const parseVerseReference = (reference: string) => {
+    const match = reference.match(/^(.+?)\s+(\d+):(\d+)/);
+    if (!match) return null;
+
+    const bookName = match[1].trim();
+    const chapter = parseInt(match[2]);
+    const verse = parseInt(match[3]);
+
+    return { bookName, chapter, verse };
+  };
+
   const loadDailyVerse = async () => {
     try {
       setLoading(true);
@@ -110,15 +122,27 @@ export default function DailyVersePage() {
     setLoadingArabic(true);
     try {
       const parsed = parseVerseReference(todayVerse.reference);
-      if (parsed) {
-        const verse = await fetchVerseByReference(
-          TRANSLATION_IDS.arabic,
-          parsed.book,
-          parsed.chapter,
-          parsed.verse
-        );
-        setArabicVerse(verse || 'Arabic translation not available');
+      if (!parsed) {
+        setArabicVerse('Could not parse verse reference');
+        return;
       }
+
+      // Find the book by English name
+      const book = findBookByName(parsed.bookName);
+      if (!book) {
+        setArabicVerse('Book not found');
+        return;
+      }
+
+      // Use Arabic book name for fetching
+      const verse = await fetchVerseByReference(
+        TRANSLATION_IDS.arabic,
+        book.arabicName,
+        parsed.chapter,
+        parsed.verse
+      );
+      
+      setArabicVerse(verse || 'Arabic translation not available');
     } catch (err) {
       console.error('Error fetching Arabic translation:', err);
       setArabicVerse('Error loading Arabic translation');
@@ -133,15 +157,27 @@ export default function DailyVersePage() {
     setLoadingGerman(true);
     try {
       const parsed = parseVerseReference(todayVerse.reference);
-      if (parsed) {
-        const verse = await fetchVerseByReference(
-          TRANSLATION_IDS.german,
-          parsed.book,
-          parsed.chapter,
-          parsed.verse
-        );
-        setGermanVerse(verse || 'German translation not available');
+      if (!parsed) {
+        setGermanVerse('Could not parse verse reference');
+        return;
       }
+
+      // Find the book by English name
+      const book = findBookByName(parsed.bookName);
+      if (!book) {
+        setGermanVerse('Book not found');
+        return;
+      }
+
+      // Use German book name for fetching
+      const verse = await fetchVerseByReference(
+        TRANSLATION_IDS.german,
+        book.germanName,
+        parsed.chapter,
+        parsed.verse
+      );
+      
+      setGermanVerse(verse || 'German translation not available');
     } catch (err) {
       console.error('Error fetching German translation:', err);
       setGermanVerse('Error loading German translation');
