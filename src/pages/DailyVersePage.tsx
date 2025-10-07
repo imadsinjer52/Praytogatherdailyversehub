@@ -236,7 +236,6 @@ export default function DailyVersePage() {
     if (!todayVerse || !germanVerse) return '';
     return `Pray with us! https://pray-to-gather.base44.app\n\n${todayVerse.reference}\n"${germanVerse}"`;
   };
-
   const formatVerseAndReflectionCopy = () => {
     if (!todayVerse) return '';
     const currentVerseText = getVerseText(todayVerse);
@@ -244,7 +243,6 @@ export default function DailyVersePage() {
     const currentPrayer = getPrayer(todayVerse);
     return `Pray with us! https://pray-to-gather.base44.app\n\n${todayVerse.reference}\n"${currentVerseText}"\n\n${currentReflection}\n\n${currentPrayer}`;
   };
-
   const formatUserReflectionCopy = () => {
     if (!todayVerse) return '';
     const currentVerseText = getVerseText(todayVerse);
