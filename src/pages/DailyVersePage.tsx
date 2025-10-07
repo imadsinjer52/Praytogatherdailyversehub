@@ -14,8 +14,8 @@ interface DailyVerseData {
   date: string;
   reference: string;
   verseTextEn: string;
-  verseTextAr: string | null;
-  verseTextDe: string | null;
+  verseTextAr: string;
+  verseTextDe: string;
   reflectionEn: string;
   reflectionAr: string;
   reflectionDe: string;
