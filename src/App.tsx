@@ -63,7 +63,7 @@ function App() {
             >
               Pray to Gather
             </a>{' '}
-            ecosystem
+            App
           </p>
         </div>
       </footer>
