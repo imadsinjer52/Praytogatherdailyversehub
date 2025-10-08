@@ -84,20 +84,18 @@ export default function DailyVersePage() {
         return;
       }
 
-      console.log('Fetching daily devotional...');
       const devotional = await getTodayDevotional();
-      console.log('Devotional received:', devotional);
 
       if (!devotional) {
-        throw new Error('Failed to fetch daily devotional - no data returned');
+        throw new Error('Failed to fetch daily devotional');
       }
 
       const newVerse: DailyVerseData = {
         date: devotional.date,
         reference: devotional.verse_reference,
         verseTextEn: devotional.verse_text_en,
-        verseTextAr: devotional.verse_text_ar || devotional.verse_text_en,
-        verseTextDe: devotional.verse_text_de || devotional.verse_text_en,
+        verseTextAr: devotional.verse_text_ar,
+        verseTextDe: devotional.verse_text_de,
         reflectionEn: devotional.reflection_en,
         reflectionAr: devotional.reflection_ar,
         reflectionDe: devotional.reflection_de,
@@ -105,15 +103,14 @@ export default function DailyVersePage() {
         prayerAr: devotional.prayer_ar,
         prayerDe: devotional.prayer_de,
         versionEn: devotional.version_en,
-        versionAr: devotional.version_ar || 'Arabic',
-        versionDe: devotional.version_de || 'Elberfelder',
+        versionAr: devotional.version_ar,
+        versionDe: devotional.version_de,
       };
 
       saveVerse(newVerse);
       setTodayVerse(newVerse);
-    } catch (err: any) {
-      const errorMsg = err?.message || 'Unable to load daily verse. Please try again later.';
-      setError(errorMsg);
+    } catch (err) {
+      setError('Unable to load daily verse. Please try again later.');
       console.error('Error fetching verse:', err);
     } finally {
       setLoading(false);
@@ -450,31 +447,20 @@ export default function DailyVersePage() {
           )}
 
           <textarea
-          value={reflectionText}
-          onChange={(e) => setReflectionText(e.target.value)}
-          placeholder={
-            language === 'ar' 
-              ? 'اكتب أفكارك وصلواتك وتأملاتك هنا...' 
-              : language === 'de' 
-              ? 'Schreiben Sie hier Ihre Gedanken, Gebete und Reflexionen...' 
-              : 'Write your thoughts, prayers, and reflections here...'
-          }
-          className={`w-full h-40 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${language === 'ar' ? 'text-right' : ''}`}
-        />
-        <div className="flex flex-col sm:flex-row gap-3">
-          <CopyButton
-            text={formatCopyText(getVerseForLanguage(language), verseReference, reflectionText)}
-            label={language === 'ar' ? 'نسخ التأمل' : language === 'de' ? 'Reflexion kopieren' : 'Copy Reflection'}
-            className="flex-1"
+            value={reflectionText}
+            onChange={(e) => setReflectionText(e.target.value)}
+            placeholder={language === 'ar' ? 'اكتب أفكارك وصلواتك وتأملاتك هنا...' : language === 'de' ? 'Schreiben Sie hier Ihre Gedanken, Gebete und Reflexionen...' : 'Write your thoughts, prayers, and reflections here...'}
+            className={`w-full h-40 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${language === 'ar' ? 'text-right' : ''}`}
           />
-          <a
-            href="https://pray-to-gather.base44.app/GloryWall"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all"
-          >
-            <ExternalLink size={18} />
-            <span>{language === 'ar' ? 'مشاركة في حائط المجد' : language === 'de' ? 'Auf Glory Wall teilen' : 'Share to Glory Wall'}</span>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <a
+              href="https://pray-to-gather.base44.app/GloryWall"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all"
+            >
+              <MessageCircle size={18} />
+              <span>{language === 'ar' ? 'مشاركة في حائط المجد' : language === 'de' ? 'Auf Glory Wall teilen' : 'Share to Glory Wall'}</span>
             </a>
           </div>
         </div>
