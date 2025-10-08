@@ -479,7 +479,7 @@ export default function DailyVersePage() {
             </a>
           </div>
         </div>
-
+>
         <div className="grid md:grid-cols-2 gap-6">
           <DiveInTheWord verseReference={todayVerse.reference} language={language} />
           <ReadInContext verseReference={todayVerse.reference} language={language} />
