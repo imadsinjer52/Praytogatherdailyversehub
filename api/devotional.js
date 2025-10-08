@@ -56,7 +56,7 @@ const bibleBooks = [
   { abbr: 'LUK', number: 42, englishName: 'Luke', arabicName: 'لوقا', germanName: 'Lukas' },
   { abbr: 'JHN', number: 43, englishName: 'John', arabicName: 'يوحنا', germanName: 'Johannes' },
   { abbr: 'ACT', number: 44, englishName: 'Acts', arabicName: 'أعمال الرسل', germanName: 'Apostelgeschichte' },
-  { abbr: 'ROM', number: 45, englishName: 'Romans', arabicName: 'رومية', germanName: 'Römer' },
+  { abbr: 'ROM', number: 45, englishName: 'Romans', arabicName: 'روما', germanName: 'Römer' },
   { abbr: '1CO', number: 46, englishName: '1 Corinthians', arabicName: 'كورنثوس الأولى', germanName: '1. Korinther' },
   { abbr: '2CO', number: 47, englishName: '2 Corinthians', arabicName: 'كورنثوس الثانية', germanName: '2. Korinther' },
   { abbr: 'GAL', number: 48, englishName: 'Galatians', arabicName: 'غلاطية', germanName: 'Galater' },
