@@ -95,7 +95,7 @@ function findBookByName(name) {
   ) || null;
 }
 
-async function fetchVerseByBookNumber(TRANSLATION_IDS, bookNumber, chapter, verse) {
+async function fetchVerseByBookNumber(versionId, bookNumber, chapter, verse) {
   try {
     const booksResponse = await fetch(`${BIBLE_API_BASE}/bibles/${versionId}/books`, {
       headers: { 'api-key': BIBLE_API_KEY },
@@ -294,8 +294,8 @@ export default async function handler(req, res) {
     let verseTextDe = null;
 
     if (parsedRef) {
-      verseTextAr = await fetchVerseByBookNumber(TRANSLATION_IDS.arabic, parsedRef.book.number, parsedRef.chapter, parsedRef.verse);
-      verseTextDe = await fetchVerseByBookNumber(TRANSLATION_IDS.german, parsedRef.book.number, parsedRef.chapter, parsedRef.verse);
+      verseTextAr = await fetchVerseByBookNumber(TRANSLATION_IDS.arabic, parsedRef.bookNumber, parsedRef.chapter, parsedRef.verse);
+      verseTextDe = await fetchVerseByBookNumber(TRANSLATION_IDS.german, parsedRef.bookNumber, parsedRef.chapter, parsedRef.verse);
     }
 
     const devotionals = await generateAllDevotionals(verseTextEn, verseTextAr, verseTextDe, reference);
