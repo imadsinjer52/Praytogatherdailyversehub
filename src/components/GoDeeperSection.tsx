@@ -9,6 +9,9 @@ import CopyButton from './CopyButton';
 interface GoDeeperSectionProps {
   verseText: string;
   verseReference: string;
+  language: Language;
+  arabicVerse?: string | null;
+  germanVerse?: string | null;
 }
 
 const categories: PromptCategory[] = [
@@ -24,7 +27,7 @@ const categories: PromptCategory[] = [
   'grow',
 ];
 
-export default function GoDeeperSection({ verseText, verseReference }: GoDeeperSectionProps) {
+export default function GoDeeperSection({ verseText, verseReference, language, arabicVerse, germanVerse }: GoDeeperSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<PromptCategory>>(new Set());
   const [categoryLanguages, setCategoryLanguages] = useState<Record<PromptCategory, Language>>(
@@ -42,8 +45,14 @@ export default function GoDeeperSection({ verseText, verseReference }: GoDeeperS
     setExpandedCategories(newExpanded);
   };
 
-  const setCategoryLanguage = (category: PromptCategory, language: Language) => {
-    setCategoryLanguages((prev) => ({ ...prev, [category]: language }));
+  const setCategoryLanguage = (category: PromptCategory, lang: Language) => {
+    setCategoryLanguages((prev) => ({ ...prev, [category]: lang }));
+  };
+
+  const getVerseForLanguage = (lang: Language) => {
+    if (lang === 'ar' && arabicVerse) return arabicVerse;
+    if (lang === 'de' && germanVerse) return germanVerse;
+    return verseText;
   };
 
   if (!isOpen) {
@@ -73,10 +82,11 @@ export default function GoDeeperSection({ verseText, verseReference }: GoDeeperS
       <div className="space-y-3">
         {categories.map((category) => {
           const isExpanded = expandedCategories.has(category);
-          const language = categoryLanguages[category];
-          const questions = generatePrompts(category, language, verseText, verseReference);
+          const catLanguage = categoryLanguages[category];
+          const questions = generatePrompts(category, catLanguage, verseText, verseReference);
           const questionsText = questions.map((q, i) => `${i + 1}. ${q}`).join('\n\n');
-          const copyText = formatCopyText(verseText, verseReference, questionsText);
+          const categoryVerse = getVerseForLanguage(catLanguage);
+          const copyText = formatCopyText(categoryVerse, verseReference, questionsText);
 
           return (
             <div key={category} className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -85,7 +95,7 @@ export default function GoDeeperSection({ verseText, verseReference }: GoDeeperS
                 className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
               >
                 <span className="font-semibold text-gray-800">
-                  {categoryLabels[category][language]}
+                  {categoryLabels[category][catLanguage]}
                 </span>
                 {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </button>
@@ -94,12 +104,12 @@ export default function GoDeeperSection({ verseText, verseReference }: GoDeeperS
                 <div className="p-4 border-t border-gray-200 space-y-4">
                   <div className="flex justify-end">
                     <LanguageToggle
-                      language={language}
+                      language={catLanguage}
                       onChange={(lang) => setCategoryLanguage(category, lang)}
                     />
                   </div>
 
-                  <div className={`space-y-3 ${language === 'ar' ? 'text-right' : ''}`}>
+                  <div className={`space-y-3 ${catLanguage === 'ar' ? 'text-right' : ''}`}>
                     {questions.map((question, index) => (
                       <div key={index} className="flex gap-3">
                         <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-medium">
@@ -110,7 +120,11 @@ export default function GoDeeperSection({ verseText, verseReference }: GoDeeperS
                     ))}
                   </div>
 
-                  <CopyButton text={copyText} label="Copy Questions" className="w-full" />
+                  <CopyButton 
+                    text={copyText} 
+                    label={catLanguage === 'ar' ? 'نسخ الأسئلة' : catLanguage === 'de' ? 'Fragen kopieren' : 'Copy Questions'} 
+                    className="w-full" 
+                  />
                 </div>
               )}
             </div>
@@ -120,17 +134,25 @@ export default function GoDeeperSection({ verseText, verseReference }: GoDeeperS
 
       {/* Personal Reflection */}
       <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
-        <h3 className="font-semibold text-lg text-gray-800">Your Personal Reflection</h3>
+        <h3 className="font-semibold text-lg text-gray-800">
+          {language === 'ar' ? 'تأملك الشخصي' : language === 'de' ? 'Ihre persönliche Reflexion' : 'Your Personal Reflection'}
+        </h3>
         <textarea
           value={reflectionText}
           onChange={(e) => setReflectionText(e.target.value)}
-          placeholder="Write your thoughts, prayers, and reflections here..."
-          className="w-full h-40 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder={
+            language === 'ar' 
+              ? 'اكتب أفكارك وصلواتك وتأملاتك هنا...' 
+              : language === 'de' 
+              ? 'Schreiben Sie hier Ihre Gedanken, Gebete und Reflexionen...' 
+              : 'Write your thoughts, prayers, and reflections here...'
+          }
+          className={`w-full h-40 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${language === 'ar' ? 'text-right' : ''}`}
         />
         <div className="flex flex-col sm:flex-row gap-3">
           <CopyButton
-            text={formatCopyText(verseText, verseReference, reflectionText)}
-            label="Copy Reflection"
+            text={formatCopyText(getVerseForLanguage(language), verseReference, reflectionText)}
+            label={language === 'ar' ? 'نسخ التأمل' : language === 'de' ? 'Reflexion kopieren' : 'Copy Reflection'}
             className="flex-1"
           />
           <a
@@ -140,7 +162,7 @@ export default function GoDeeperSection({ verseText, verseReference }: GoDeeperS
             className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all"
           >
             <ExternalLink size={18} />
-            <span>Share to Glory Wall</span>
+            <span>{language === 'ar' ? 'مشاركة في حائط المجد' : language === 'de' ? 'Auf Glory Wall teilen' : 'Share to Glory Wall'}</span>
           </a>
         </div>
       </div>

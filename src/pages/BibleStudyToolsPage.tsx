@@ -157,6 +157,12 @@ export default function BibleStudyToolsPage() {
     return parseInt(v) >= parseInt(fromVerse);
   });
 
+  const stripHtmlTags = (html: string) => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  };
+
   if (loadingVersions) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -165,6 +171,12 @@ export default function BibleStudyToolsPage() {
       </div>
     );
   }
+
+  const currentVersion = filteredVersions.find((v) => v.id === selectedVersion);
+  const verseTextOnly = verseResult ? stripHtmlTags(verseResult.content) : '';
+  const verseCopyText = verseResult && currentVersion
+    ? `Pray with us! https://pray-to-gather.base44.app\n\n${verseResult.reference}\n${verseTextOnly}\n\n${currentVersion.name}`
+    : '';
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -318,12 +330,17 @@ export default function BibleStudyToolsPage() {
           <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h3 className="text-xl font-bold text-blue-600 mb-4">{verseResult.reference}</h3>
             <div
-              className="prose prose-lg max-w-none text-gray-800 leading-relaxed"
+              className="prose prose-lg max-w-none text-gray-800 leading-relaxed mb-4"
               dangerouslySetInnerHTML={{ __html: verseResult.content }}
             />
-            <p className="mt-4 text-sm text-gray-500">
-              {filteredVersions.find((v) => v.id === selectedVersion)?.name}
+            <p className="mb-4 text-sm text-gray-500">
+              {currentVersion?.name}
             </p>
+            <CopyButton
+              text={verseCopyText}
+              label={language === 'ar' ? 'نسخ الآية' : language === 'de' ? 'Vers kopieren' : 'Copy Verse'}
+              className="w-full"
+            />
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
@@ -337,11 +354,6 @@ export default function BibleStudyToolsPage() {
               className={`w-full h-40 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${language === 'ar' ? 'text-right' : ''}`}
             />
             <div className="flex flex-col sm:flex-row gap-3">
-              <CopyButton
-                text={formatCopyText(verseResult.content, verseResult.reference, reflectionText)}
-                label={language === 'ar' ? 'نسخ التأمل' : language === 'de' ? 'Reflexion kopieren' : 'Copy Reflection'}
-                className="flex-1"
-              />
               <a
                 href="https://pray-to-gather.base44.app/GloryWall"
                 target="_blank"
@@ -359,7 +371,7 @@ export default function BibleStudyToolsPage() {
             <ReadInContext verseReference={verseResult.reference} language={language} />
           </div>
 
-          <GoDeeperSection verseText={verseResult.content} verseReference={verseResult.reference} language={language} />
+          <GoDeeperSection verseText={verseTextOnly} verseReference={verseResult.reference} language={language} />
         </>
       )}
     </div>
