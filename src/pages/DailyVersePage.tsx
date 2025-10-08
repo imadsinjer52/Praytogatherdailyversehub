@@ -134,12 +134,23 @@ export default function DailyVersePage() {
         return;
       }
 
-      const verse = await fetchVerseByReference(
+      // Try with English name first for the Bible API
+      let verse = await fetchVerseByReference(
         TRANSLATION_IDS.arabic,
-        book.arabicName,
+        book.englishName,
         parsed.chapter,
         parsed.verse
       );
+      
+      // If that fails, try with the abbreviation
+      if (!verse) {
+        verse = await fetchVerseByReference(
+          TRANSLATION_IDS.arabic,
+          book.abbr,
+          parsed.chapter,
+          parsed.verse
+        );
+      }
       
       setArabicVerse(verse || 'Arabic translation not available');
     } catch (err) {
@@ -167,12 +178,23 @@ export default function DailyVersePage() {
         return;
       }
 
-      const verse = await fetchVerseByReference(
+      // Try with English name first for the Bible API
+      let verse = await fetchVerseByReference(
         TRANSLATION_IDS.german,
-        book.germanName,
+        book.englishName,
         parsed.chapter,
         parsed.verse
       );
+      
+      // If that fails, try with the abbreviation
+      if (!verse) {
+        verse = await fetchVerseByReference(
+          TRANSLATION_IDS.german,
+          book.abbr,
+          parsed.chapter,
+          parsed.verse
+        );
+      }
       
       setGermanVerse(verse || 'German translation not available');
     } catch (err) {
@@ -198,6 +220,12 @@ export default function DailyVersePage() {
     if (language === 'ar') return verse.reflectionAr;
     if (language === 'de') return verse.reflectionDe;
     return verse.reflectionEn;
+  };
+
+  const getPrayer = (verse: DailyVerseData) => {
+    if (language === 'ar') return verse.prayerAr;
+    if (language === 'de') return verse.prayerDe;
+    return verse.prayerEn;
   };
 
   const getVersion = (verse: DailyVerseData) => {
@@ -240,6 +268,7 @@ export default function DailyVersePage() {
 
   const currentVerseText = getVerseText(todayVerse);
   const currentReflection = getReflection(todayVerse);
+  const currentPrayer = getPrayer(todayVerse);
   const currentVersion = getVersion(todayVerse);
 
   const arabicCopyText = arabicVerse ? formatCopyText(arabicVerse, todayVerse.reference, '') : '';
@@ -387,18 +416,6 @@ export default function DailyVersePage() {
           </div>
 
           <ReadInContext verseReference={todayVerse.reference} language={language} />
-        </div>
-
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-md p-6 md:p-8">
-          <div className="flex items-center gap-3 mb-4">
-            <Heart className="w-5 h-5 text-blue-600" />
-            <h3 className="text-lg font-bold text-gray-800">
-              {language === 'ar' ? 'التأمل اليومي' : language === 'de' ? 'Tägliche Reflexion' : 'Daily Reflection'}
-            </h3>
-          </div>
-          <p className={`text-gray-700 leading-relaxed whitespace-pre-line ${language === 'ar' ? 'text-right' : ''}`}>
-            {currentReflection}
-          </p>
         </div>
 
         <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
