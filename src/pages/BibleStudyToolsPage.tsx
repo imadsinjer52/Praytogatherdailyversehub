@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Loader2, MessageCircle } from 'lucide-react';
+import { Search, Loader2, MessageCircle, Lightbulb } from 'lucide-react';
 import {
   fetchBibleVersions,
   getUniqueLanguages,
@@ -38,6 +38,7 @@ export default function BibleStudyToolsPage() {
   const [loadingVersions, setLoadingVersions] = useState(true);
   const [language, setLanguage] = useState<Language>('en');
   const [reflectionText, setReflectionText] = useState('');
+  const [showReflectionLinks, setShowReflectionLinks] = useState(false);
 
   useEffect(() => {
     loadVersions();
@@ -150,6 +151,15 @@ export default function BibleStudyToolsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getChatGPTPrompt = (lang: Language, reference: string) => {
+    if (lang === 'ar') {
+      return `الآية: ${reference}\nاكتب تأملاً (4-6 جمل) حول هذه الآية:\n- أظهر كيف تشير الآية إلى يسوع المسيح والإنجيل.\n- أوضح كيف تكشف هذه الآية قلب الله.\n- اجعل التأمل عملياً لحياة المؤمن اليومية.\n- شجّع على تعميق الإيمان والثقة بالله.\n- تجنّب أي لهجة لاهوتية طائفية.\nبعد ذلك، اكتب 2-3 أسئلة عميقة تساعد القارئ على الصلاة بهذه الآية من قلبه`;
+    } else if (lang === 'de') {
+      return `Schreibe eine Reflexion (4–6 Sätze) über diesen Bibelvers: ${reference}\n- Zeige, wie der Vers auf Jesus Christus und das Evangelium hinweist.\n- Erkläre, wie dieser Vers Gottes Herz offenbart.\n- Mache die Reflexion praktisch für das tägliche christliche Leben.\n- Ermutige zu tieferem Glauben und Vertrauen in Gott.\n- Vermeide konfessionelle Theologie.\nSchreibe anschließend 2–3 nachdenkliche Fragen, die dem Leser helfen, diesen Vers persönlich im Gebet zu bewegen.`;
+    }
+    return `Write a Reflection (4–6 sentences) on this Bible verse: ${reference}\n- Point to Jesus Christ and the Gospel.\n- Show how the verse reveals God's heart.\n- Make it practical for daily Christian living.\n- Encourage deeper faith and trust in God.\n- Avoid denominational theology.\nThen, write 2–3 thoughtful questions to help the reader pray this verse from their heart.`;
   };
 
   const availableToVerses = verses.filter((v) => {
@@ -347,6 +357,47 @@ export default function BibleStudyToolsPage() {
             <h3 className="font-semibold text-lg text-gray-800">
               {language === 'ar' ? 'تأملك الشخصي' : language === 'de' ? 'Ihre persönliche Reflexion' : 'Your Personal Reflection'}
             </h3>
+            
+            <button
+              onClick={() => setShowReflectionLinks(!showReflectionLinks)}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all"
+            >
+              <Lightbulb className="w-5 h-5" />
+              <span>{language === 'ar' ? 'اكتب لي تأملاً' : language === 'de' ? 'Schreibe mir eine Reflexion' : 'Write me a reflection'}</span>
+            </button>
+
+            {showReflectionLinks && (
+              <div className="grid gap-2 p-4 bg-purple-50 rounded-lg">
+                <a
+                  href={`https://chat.openai.com/?q=${encodeURIComponent(getChatGPTPrompt('ar', verseResult.reference))}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-3 bg-white hover:bg-purple-100 rounded-lg transition-colors"
+                >
+                  <span className="text-purple-700 font-medium">في العربية</span>
+                  <MessageCircle className="w-4 h-4 text-purple-600" />
+                </a>
+                <a
+                  href={`https://chat.openai.com/?q=${encodeURIComponent(getChatGPTPrompt('en', verseResult.reference))}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-3 bg-white hover:bg-purple-100 rounded-lg transition-colors"
+                >
+                  <span className="text-purple-700 font-medium">In English</span>
+                  <MessageCircle className="w-4 h-4 text-purple-600" />
+                </a>
+                <a
+                  href={`https://chat.openai.com/?q=${encodeURIComponent(getChatGPTPrompt('de', verseResult.reference))}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-3 bg-white hover:bg-purple-100 rounded-lg transition-colors"
+                >
+                  <span className="text-purple-700 font-medium">Auf Deutsch</span>
+                  <MessageCircle className="w-4 h-4 text-purple-600" />
+                </a>
+              </div>
+            )}
+
             <textarea
               value={reflectionText}
               onChange={(e) => setReflectionText(e.target.value)}
