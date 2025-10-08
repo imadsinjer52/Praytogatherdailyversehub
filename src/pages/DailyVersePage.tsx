@@ -84,20 +84,18 @@ export default function DailyVersePage() {
         return;
       }
 
-      console.log('Fetching daily devotional...');
       const devotional = await getTodayDevotional();
-      console.log('Devotional received:', devotional);
 
       if (!devotional) {
-        throw new Error('Failed to fetch daily devotional - no data returned');
+        throw new Error('Failed to fetch daily devotional');
       }
 
       const newVerse: DailyVerseData = {
         date: devotional.date,
         reference: devotional.verse_reference,
         verseTextEn: devotional.verse_text_en,
-        verseTextAr: devotional.verse_text_ar || devotional.verse_text_en,
-        verseTextDe: devotional.verse_text_de || devotional.verse_text_en,
+        verseTextAr: devotional.verse_text_ar,
+        verseTextDe: devotional.verse_text_de,
         reflectionEn: devotional.reflection_en,
         reflectionAr: devotional.reflection_ar,
         reflectionDe: devotional.reflection_de,
@@ -105,15 +103,14 @@ export default function DailyVersePage() {
         prayerAr: devotional.prayer_ar,
         prayerDe: devotional.prayer_de,
         versionEn: devotional.version_en,
-        versionAr: devotional.version_ar || 'Arabic',
-        versionDe: devotional.version_de || 'Elberfelder',
+        versionAr: devotional.version_ar,
+        versionDe: devotional.version_de,
       };
 
       saveVerse(newVerse);
       setTodayVerse(newVerse);
-    } catch (err: any) {
-      const errorMsg = err?.message || 'Unable to load daily verse. Please try again later.';
-      setError(errorMsg);
+    } catch (err) {
+      setError('Unable to load daily verse. Please try again later.');
       console.error('Error fetching verse:', err);
     } finally {
       setLoading(false);
@@ -137,12 +134,23 @@ export default function DailyVersePage() {
         return;
       }
 
-      const verse = await fetchVerseByReference(
+      // Try with English name first for the Bible API
+      let verse = await fetchVerseByReference(
         TRANSLATION_IDS.arabic,
-        book.arabicName,
+        book.englishName,
         parsed.chapter,
         parsed.verse
       );
+      
+      // If that fails, try with the abbreviation
+      if (!verse) {
+        verse = await fetchVerseByReference(
+          TRANSLATION_IDS.arabic,
+          book.abbr,
+          parsed.chapter,
+          parsed.verse
+        );
+      }
       
       setArabicVerse(verse || 'Arabic translation not available');
     } catch (err) {
@@ -170,12 +178,23 @@ export default function DailyVersePage() {
         return;
       }
 
-      const verse = await fetchVerseByReference(
+      // Try with English name first for the Bible API
+      let verse = await fetchVerseByReference(
         TRANSLATION_IDS.german,
-        book.germanName,
+        book.englishName,
         parsed.chapter,
         parsed.verse
       );
+      
+      // If that fails, try with the abbreviation
+      if (!verse) {
+        verse = await fetchVerseByReference(
+          TRANSLATION_IDS.german,
+          book.abbr,
+          parsed.chapter,
+          parsed.verse
+        );
+      }
       
       setGermanVerse(verse || 'German translation not available');
     } catch (err) {
@@ -201,6 +220,12 @@ export default function DailyVersePage() {
     if (language === 'ar') return verse.reflectionAr;
     if (language === 'de') return verse.reflectionDe;
     return verse.reflectionEn;
+  };
+
+  const getPrayer = (verse: DailyVerseData) => {
+    if (language === 'ar') return verse.prayerAr;
+    if (language === 'de') return verse.prayerDe;
+    return verse.prayerEn;
   };
 
   const getVersion = (verse: DailyVerseData) => {
@@ -243,6 +268,7 @@ export default function DailyVersePage() {
 
   const currentVerseText = getVerseText(todayVerse);
   const currentReflection = getReflection(todayVerse);
+  const currentPrayer = getPrayer(todayVerse);
   const currentVersion = getVersion(todayVerse);
 
   const arabicCopyText = arabicVerse ? formatCopyText(arabicVerse, todayVerse.reference, '') : '';
@@ -392,18 +418,6 @@ export default function DailyVersePage() {
           <ReadInContext verseReference={todayVerse.reference} language={language} />
         </div>
 
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-md p-6 md:p-8">
-          <div className="flex items-center gap-3 mb-4">
-            <Heart className="w-5 h-5 text-blue-600" />
-            <h3 className="text-lg font-bold text-gray-800">
-              {language === 'ar' ? 'التأمل اليومي' : language === 'de' ? 'Tägliche Reflexion' : 'Daily Reflection'}
-            </h3>
-          </div>
-          <p className={`text-gray-700 leading-relaxed whitespace-pre-line ${language === 'ar' ? 'text-right' : ''}`}>
-            {currentReflection}
-          </p>
-        </div>
-
         <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
           <h3 className="font-semibold text-lg text-gray-800">
             {language === 'ar' ? 'تأملك الشخصي' : language === 'de' ? 'Ihre persönliche Reflexion' : 'Your Personal Reflection'}
@@ -449,34 +463,13 @@ export default function DailyVersePage() {
             </div>
           )}
 
-                   <textarea
+          <textarea
             value={reflectionText}
             onChange={(e) => setReflectionText(e.target.value)}
-            placeholder={
-              language === 'ar'
-                ? 'اكتب أفكارك وصلواتك وتأملاتك هنا...'
-                : language === 'de'
-                ? 'Schreiben Sie hier Ihre Gedanken, Gebete und Reflexionen...'
-                : 'Write your thoughts, prayers, and reflections here...'
-            }
-            className={`w-full h-40 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-              language === 'ar' ? 'text-right' : ''
-            }`}
+            placeholder={language === 'ar' ? 'اكتب أفكارك وصلواتك وتأملاتك هنا...' : language === 'de' ? 'Schreiben Sie hier Ihre Gedanken, Gebete und Reflexionen...' : 'Write your thoughts, prayers, and reflections here...'}
+            className={`w-full h-40 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${language === 'ar' ? 'text-right' : ''}`}
           />
-
           <div className="flex flex-col sm:flex-row gap-3">
-            <CopyButton
-              text={formatCopyText(currentVerseText, todayVerse.reference, reflectionText)}
-              label={
-                language === 'ar'
-                  ? 'نسخ التأمل'
-                  : language === 'de'
-                  ? 'Reflexion kopieren'
-                  : 'Copy Reflection'
-              }
-              className="flex-1"
-            />
-
             <a
               href="https://pray-to-gather.base44.app/GloryWall"
               target="_blank"
@@ -484,31 +477,11 @@ export default function DailyVersePage() {
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all"
             >
               <MessageCircle size={18} />
-              <span>
-                {language === 'ar'
-                  ? 'مشاركة في حائط المجد'
-                  : language === 'de'
-                  ? 'Auf Glory Wall teilen'
-                  : 'Share to Glory Wall'}
-              </span>
+              <span>{language === 'ar' ? 'مشاركة في حائط المجد' : language === 'de' ? 'Auf Glory Wall teilen' : 'Share to Glory Wall'}</span>
             </a>
           </div>
+        </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <DiveInTheWord verseReference={todayVerse.reference} language={language} />
-            <ReadInContext verseReference={todayVerse.reference} language={language} />
-          </div>
-
-          <GoDeeperSection 
-            verseText={currentVerseText} 
-            verseReference={todayVerse.reference} 
-            language={language}
-            arabicVerse={arabicVerse}
-            germanVerse={germanVerse}
-          />
-        </div> {/* 👈 Closes the main reflection card div */}
-        
-        {recentVerses.length > 1 && (
         <div className="grid md:grid-cols-2 gap-6">
           <DiveInTheWord verseReference={todayVerse.reference} language={language} />
           <ReadInContext verseReference={todayVerse.reference} language={language} />
@@ -523,69 +496,57 @@ export default function DailyVersePage() {
         />
       </div>
 
-     {recentVerses.length > 1 && (
-  <div className="mt-12">
-    <div className="flex items-center gap-3 mb-6">
-      <Calendar className="w-6 h-6 text-blue-600" />
-      <h2 className="text-2xl font-bold text-gray-800">
-        {language === 'ar' ? 'الآيات الأخيرة' : language === 'de' ? 'Letzte Verse' : 'Recent Verses'}
-      </h2>
-    </div>
-
-    <div className="grid gap-6">
-      {recentVerses.slice(1).map((verse, index) => {
-        const verseText = getVerseText(verse);
-        const reflection = getReflection(verse);
-        const version = getVersion(verse);
-        const verseCopyText = formatCopyText(verseText, verse.reference, reflection);
-
-        return (
-          <div key={index} className="bg-white rounded-xl shadow-md p-6">
-            <p className="text-sm text-gray-500 mb-3">
-              {new Date(verse.date).toLocaleDateString(
-                language === 'ar' ? 'ar-EG' : language === 'de' ? 'de-DE' : 'en-US',
-                {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                }
-              )}
-            </p>
-
-            <p
-              className={`text-lg text-gray-800 leading-relaxed mb-3 italic ${
-                language === 'ar' ? 'text-right' : ''
-              }`}
-            >
-              "{verseText}"
-            </p>
-            <p
-              className={`text-blue-600 font-semibold mb-4 ${
-                language === 'ar' ? 'text-left' : 'text-right'
-              }`}
-            >
-              {verse.reference} ({version})
-            </p>
-
-            <div className="bg-blue-50 rounded-lg p-4 mb-4">
-              <p
-                className={`text-sm text-gray-700 leading-relaxed ${
-                  language === 'ar' ? 'text-right' : ''
-                }`}
-              >
-                {reflection.slice(0, 200)}...
-              </p>
-            </div>
-
-            <CopyButton
-              text={verseCopyText}
-              label={language === 'ar' ? 'نسخ' : language === 'de' ? 'Kopieren' : 'Copy'}
-              className="w-full"
-            />
+      {recentVerses.length > 1 && (
+        <div className="mt-12">
+          <div className="flex items-center gap-3 mb-6">
+            <Calendar className="w-6 h-6 text-blue-600" />
+            <h2 className="text-2xl font-bold text-gray-800">
+              {language === 'ar' ? 'الآيات الأخيرة' : language === 'de' ? 'Letzte Verse' : 'Recent Verses'}
+            </h2>
           </div>
-        );
-      })}
+
+          <div className="grid gap-6">
+            {recentVerses.slice(1).map((verse, index) => {
+              const verseText = getVerseText(verse);
+              const reflection = getReflection(verse);
+              const version = getVersion(verse);
+              const verseCopyText = formatCopyText(verseText, verse.reference, reflection);
+
+              return (
+                <div key={index} className="bg-white rounded-xl shadow-md p-6">
+                  <p className="text-sm text-gray-500 mb-3">
+                    {new Date(verse.date).toLocaleDateString(language === 'ar' ? 'ar-EG' : language === 'de' ? 'de-DE' : 'en-US', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </p>
+
+                  <p className={`text-lg text-gray-800 leading-relaxed mb-3 italic ${language === 'ar' ? 'text-right' : ''}`}>
+                    "{verseText}"
+                  </p>
+                  <p className={`text-blue-600 font-semibold mb-4 ${language === 'ar' ? 'text-left' : 'text-right'}`}>
+                    {verse.reference} ({version})
+                  </p>
+
+                  <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                    <p className={`text-sm text-gray-700 leading-relaxed ${language === 'ar' ? 'text-right' : ''}`}>
+                      {reflection.slice(0, 200)}...
+                    </p>
+                  </div>
+
+                  <CopyButton
+                    text={verseCopyText}
+                    label={language === 'ar' ? 'نسخ' : language === 'de' ? 'Kopieren' : 'Copy'}
+                    className="w-full"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-)}
+  );
+}
