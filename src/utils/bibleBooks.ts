@@ -52,7 +52,7 @@ export const bibleBooks: BibleBook[] = [
   { abbr: 'LUK', number: 42, englishName: 'Luke', arabicName: 'لوقا', germanName: 'Lukas', chapters: 24 },
   { abbr: 'JHN', number: 43, englishName: 'John', arabicName: 'يوحنا', germanName: 'Johannes', chapters: 21 },
   { abbr: 'ACT', number: 44, englishName: 'Acts', arabicName: 'أعمال الرسل', germanName: 'Apostelgeschichte', chapters: 28 },
-  { abbr: 'ROM', number: 45, englishName: 'Romans', arabicName: 'رومية', germanName: 'Römer', chapters: 16 },
+  { abbr: 'ROM', number: 45, englishName: 'Romans', arabicName: 'روما', germanName: 'Römer', chapters: 16 },
   { abbr: '1CO', number: 46, englishName: '1 Corinthians', arabicName: 'كورنثوس الأولى', germanName: '1. Korinther', chapters: 16 },
   { abbr: '2CO', number: 47, englishName: '2 Corinthians', arabicName: 'كورنثوس الثانية', germanName: '2. Korinther', chapters: 13 },
   { abbr: 'GAL', number: 48, englishName: 'Galatians', arabicName: 'غلاطية', germanName: 'Galater', chapters: 6 },
