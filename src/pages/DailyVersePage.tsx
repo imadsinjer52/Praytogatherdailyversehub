@@ -462,6 +462,18 @@ export default function DailyVersePage() {
               rel="noopener noreferrer"
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all"
             >
+              <div className="flex flex-col sm:flex-row gap-3">
+          <CopyButton
+            text={formatCopyText(getVerseForLanguage(language), verseReference, reflectionText)}
+            label={language === 'ar' ? 'نسخ التأمل' : language === 'de' ? 'Reflexion kopieren' : 'Copy Reflection'}
+            className="flex-1"
+          />
+          <a
+            href="https://pray-to-gather.base44.app/GloryWall"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all"
+          >
               <MessageCircle size={18} />
               <span>{language === 'ar' ? 'مشاركة في حائط المجد' : language === 'de' ? 'Auf Glory Wall teilen' : 'Share to Glory Wall'}</span>
             </a>
