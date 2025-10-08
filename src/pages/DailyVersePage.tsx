@@ -523,57 +523,69 @@ export default function DailyVersePage() {
         />
       </div>
 
-      {recentVerses.length > 1 && (
-        <div className="mt-12">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="w-6 h-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-800">
-              {language === 'ar' ? 'الآيات الأخيرة' : language === 'de' ? 'Letzte Verse' : 'Recent Verses'}
-            </h2>
-          </div>
-
-          <div className="grid gap-6">
-            {recentVerses.slice(1).map((verse, index) => {
-              const verseText = getVerseText(verse);
-              const reflection = getReflection(verse);
-              const version = getVersion(verse);
-              const verseCopyText = formatCopyText(verseText, verse.reference, reflection);
-
-              return (
-                <div key={index} className="bg-white rounded-xl shadow-md p-6">
-                  <p className="text-sm text-gray-500 mb-3">
-                    {new Date(verse.date).toLocaleDateString(language === 'ar' ? 'ar-EG' : language === 'de' ? 'de-DE' : 'en-US', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </p>
-
-                  <p className={`text-lg text-gray-800 leading-relaxed mb-3 italic ${language === 'ar' ? 'text-right' : ''}`}>
-                    "{verseText}"
-                  </p>
-                  <p className={`text-blue-600 font-semibold mb-4 ${language === 'ar' ? 'text-left' : 'text-right'}`}>
-                    {verse.reference} ({version})
-                  </p>
-
-                  <div className="bg-blue-50 rounded-lg p-4 mb-4">
-                    <p className={`text-sm text-gray-700 leading-relaxed ${language === 'ar' ? 'text-right' : ''}`}>
-                      {reflection.slice(0, 200)}...
-                    </p>
-                  </div>
-
-                  <CopyButton
-                    text={verseCopyText}
-                    label={language === 'ar' ? 'نسخ' : language === 'de' ? 'Kopieren' : 'Copy'}
-                    className="w-full"
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+     {recentVerses.length > 1 && (
+  <div className="mt-12">
+    <div className="flex items-center gap-3 mb-6">
+      <Calendar className="w-6 h-6 text-blue-600" />
+      <h2 className="text-2xl font-bold text-gray-800">
+        {language === 'ar' ? 'الآيات الأخيرة' : language === 'de' ? 'Letzte Verse' : 'Recent Verses'}
+      </h2>
     </div>
-  );
-}
+
+    <div className="grid gap-6">
+      {recentVerses.slice(1).map((verse, index) => {
+        const verseText = getVerseText(verse);
+        const reflection = getReflection(verse);
+        const version = getVersion(verse);
+        const verseCopyText = formatCopyText(verseText, verse.reference, reflection);
+
+        return (
+          <div key={index} className="bg-white rounded-xl shadow-md p-6">
+            <p className="text-sm text-gray-500 mb-3">
+              {new Date(verse.date).toLocaleDateString(
+                language === 'ar' ? 'ar-EG' : language === 'de' ? 'de-DE' : 'en-US',
+                {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                }
+              )}
+            </p>
+
+            <p
+              className={`text-lg text-gray-800 leading-relaxed mb-3 italic ${
+                language === 'ar' ? 'text-right' : ''
+              }`}
+            >
+              "{verseText}"
+            </p>
+            <p
+              className={`text-blue-600 font-semibold mb-4 ${
+                language === 'ar' ? 'text-left' : 'text-right'
+              }`}
+            >
+              {verse.reference} ({version})
+            </p>
+
+            <div className="bg-blue-50 rounded-lg p-4 mb-4">
+              <p
+                className={`text-sm text-gray-700 leading-relaxed ${
+                  language === 'ar' ? 'text-right' : ''
+                }`}
+              >
+                {reflection.slice(0, 200)}...
+              </p>
+            </div>
+
+            <CopyButton
+              text={verseCopyText}
+              label={language === 'ar' ? 'نسخ' : language === 'de' ? 'Kopieren' : 'Copy'}
+              className="w-full"
+            />
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
