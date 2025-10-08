@@ -449,50 +449,66 @@ export default function DailyVersePage() {
             </div>
           )}
 
-         <textarea
-  value={reflectionText}
-  onChange={(e) => setReflectionText(e.target.value)}
-  placeholder={
-    language === 'ar'
-      ? 'اكتب أفكارك وصلواتك وتأملاتك هنا...'
-      : language === 'de'
-      ? 'Schreiben Sie hier Ihre Gedanken, Gebete und Reflexionen...'
-      : 'Write your thoughts, prayers, and reflections here...'
-  }
-  className={`w-full h-40 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-    language === 'ar' ? 'text-right' : ''
-  }`}
-/>
+                   <textarea
+            value={reflectionText}
+            onChange={(e) => setReflectionText(e.target.value)}
+            placeholder={
+              language === 'ar'
+                ? 'اكتب أفكارك وصلواتك وتأملاتك هنا...'
+                : language === 'de'
+                ? 'Schreiben Sie hier Ihre Gedanken, Gebete und Reflexionen...'
+                : 'Write your thoughts, prayers, and reflections here...'
+            }
+            className={`w-full h-40 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              language === 'ar' ? 'text-right' : ''
+            }`}
+          />
 
-<div className="flex flex-col sm:flex-row gap-3">
-  <CopyButton
-    text={formatCopyText(getVerseForLanguage(language), verseReference, reflectionText)}
-    label={
-      language === 'ar'
-        ? 'نسخ التأمل'
-        : language === 'de'
-        ? 'Reflexion kopieren'
-        : 'Copy Reflection'
-    }
-    className="flex-1"
-  />
+          <div className="flex flex-col sm:flex-row gap-3">
+            <CopyButton
+              text={formatCopyText(currentVerseText, todayVerse.reference, reflectionText)}
+              label={
+                language === 'ar'
+                  ? 'نسخ التأمل'
+                  : language === 'de'
+                  ? 'Reflexion kopieren'
+                  : 'Copy Reflection'
+              }
+              className="flex-1"
+            />
 
-  <a
-    href="https://pray-to-gather.base44.app/GloryWall"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all"
-  >
-    <MessageCircle size={18} />
-    <span>
-      {language === 'ar'
-        ? 'مشاركة في حائط المجد'
-        : language === 'de'
-        ? 'Auf Glory Wall teilen'
-        : 'Share to Glory Wall'}
-    </span>
-  </a>
-</div>
+            <a
+              href="https://pray-to-gather.base44.app/GloryWall"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all"
+            >
+              <MessageCircle size={18} />
+              <span>
+                {language === 'ar'
+                  ? 'مشاركة في حائط المجد'
+                  : language === 'de'
+                  ? 'Auf Glory Wall teilen'
+                  : 'Share to Glory Wall'}
+              </span>
+            </a>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <DiveInTheWord verseReference={todayVerse.reference} language={language} />
+            <ReadInContext verseReference={todayVerse.reference} language={language} />
+          </div>
+
+          <GoDeeperSection 
+            verseText={currentVerseText} 
+            verseReference={todayVerse.reference} 
+            language={language}
+            arabicVerse={arabicVerse}
+            germanVerse={germanVerse}
+          />
+        </div> {/* 👈 Closes the main reflection card div */}
+        
+        {recentVerses.length > 1 && (
         <div className="grid md:grid-cols-2 gap-6">
           <DiveInTheWord verseReference={todayVerse.reference} language={language} />
           <ReadInContext verseReference={todayVerse.reference} language={language} />
