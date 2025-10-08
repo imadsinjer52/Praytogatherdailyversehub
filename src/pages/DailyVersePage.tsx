@@ -84,18 +84,20 @@ export default function DailyVersePage() {
         return;
       }
 
+      console.log('Fetching daily devotional...');
       const devotional = await getTodayDevotional();
+      console.log('Devotional received:', devotional);
 
       if (!devotional) {
-        throw new Error('Failed to fetch daily devotional');
+        throw new Error('Failed to fetch daily devotional - no data returned');
       }
 
       const newVerse: DailyVerseData = {
         date: devotional.date,
         reference: devotional.verse_reference,
         verseTextEn: devotional.verse_text_en,
-        verseTextAr: devotional.verse_text_ar,
-        verseTextDe: devotional.verse_text_de,
+        verseTextAr: devotional.verse_text_ar || devotional.verse_text_en,
+        verseTextDe: devotional.verse_text_de || devotional.verse_text_en,
         reflectionEn: devotional.reflection_en,
         reflectionAr: devotional.reflection_ar,
         reflectionDe: devotional.reflection_de,
@@ -103,14 +105,15 @@ export default function DailyVersePage() {
         prayerAr: devotional.prayer_ar,
         prayerDe: devotional.prayer_de,
         versionEn: devotional.version_en,
-        versionAr: devotional.version_ar,
-        versionDe: devotional.version_de,
+        versionAr: devotional.version_ar || 'Arabic',
+        versionDe: devotional.version_de || 'Elberfelder',
       };
 
       saveVerse(newVerse);
       setTodayVerse(newVerse);
-    } catch (err) {
-      setError('Unable to load daily verse. Please try again later.');
+    } catch (err: any) {
+      const errorMsg = err?.message || 'Unable to load daily verse. Please try again later.';
+      setError(errorMsg);
       console.error('Error fetching verse:', err);
     } finally {
       setLoading(false);
@@ -134,23 +137,12 @@ export default function DailyVersePage() {
         return;
       }
 
-      // Try with English name first for the Bible API
-      let verse = await fetchVerseByReference(
+      const verse = await fetchVerseByReference(
         TRANSLATION_IDS.arabic,
-        book.englishName,
+        book.arabicName,
         parsed.chapter,
         parsed.verse
       );
-      
-      // If that fails, try with the abbreviation
-      if (!verse) {
-        verse = await fetchVerseByReference(
-          TRANSLATION_IDS.arabic,
-          book.abbr,
-          parsed.chapter,
-          parsed.verse
-        );
-      }
       
       setArabicVerse(verse || 'Arabic translation not available');
     } catch (err) {
@@ -178,23 +170,12 @@ export default function DailyVersePage() {
         return;
       }
 
-      // Try with English name first for the Bible API
-      let verse = await fetchVerseByReference(
+      const verse = await fetchVerseByReference(
         TRANSLATION_IDS.german,
-        book.englishName,
+        book.germanName,
         parsed.chapter,
         parsed.verse
       );
-      
-      // If that fails, try with the abbreviation
-      if (!verse) {
-        verse = await fetchVerseByReference(
-          TRANSLATION_IDS.german,
-          book.abbr,
-          parsed.chapter,
-          parsed.verse
-        );
-      }
       
       setGermanVerse(verse || 'German translation not available');
     } catch (err) {
@@ -222,12 +203,6 @@ export default function DailyVersePage() {
     return verse.reflectionEn;
   };
 
-  const getPrayer = (verse: DailyVerseData) => {
-    if (language === 'ar') return verse.prayerAr;
-    if (language === 'de') return verse.prayerDe;
-    return verse.prayerEn;
-  };
-
   const getVersion = (verse: DailyVerseData) => {
     if (language === 'ar') return verse.versionAr;
     if (language === 'de') return verse.versionDe;
@@ -236,11 +211,11 @@ export default function DailyVersePage() {
 
   const getChatGPTPrompt = (lang: Language, reference: string) => {
     if (lang === 'ar') {
-      return `الآية: ${reference}\nاكتب تأملاً (4-6 جمل) حول هذه الآية:\n- أظهر كيف تشير الآية إلى يسوع المسيح والإنجيل.\n- أوضح كيف تكشف هذه الآية قلب الله.\n- اجعل التأمل عملياً لحياة المؤمن اليومية.\n- شجّع على تعميق الإيمان والثقة بالله.\n- تجنّب أي لهجة لاهوتية طائفية.\nبعد ذلك، اكتب 2-3 أسئلة عميقة تساعد القارئ على الصلاة بهذه الآية من قلبه`;
+      return `Ø§Ù„Ø¢ÙŠØ©: ${reference}\nØ§ÙƒØªØ¨ ØªØ£Ù…Ù„Ø§Ù‹ (4-6 Ø¬Ù…Ù„) Ø­ÙˆÙ„ Ù‡Ø°Ù‡ Ø§Ù„Ø¢ÙŠØ©:\n- Ø£Ø¸Ù‡Ø± ÙƒÙŠÙ ØªØ´ÙŠØ± Ø§Ù„Ø¢ÙŠØ© Ø¥Ù„Ù‰ ÙŠØ³ÙˆØ¹ Ø§Ù„Ù…Ø³ÙŠØ­ ÙˆØ§Ù„Ø¥Ù†Ø¬ÙŠÙ„.\n- Ø£ÙˆØ¶Ø­ ÙƒÙŠÙ ØªÙƒØ´Ù Ù‡Ø°Ù‡ Ø§Ù„Ø¢ÙŠØ© Ù‚Ù„Ø¨ Ø§Ù„Ù„Ù‡.\n- Ø§Ø¬Ø¹Ù„ Ø§Ù„ØªØ£Ù…Ù„ Ø¹Ù…Ù„ÙŠØ§Ù‹ Ù„Ø­ÙŠØ§Ø© Ø§Ù„Ù…Ø¤Ù…Ù† Ø§Ù„ÙŠÙˆÙ…ÙŠØ©.\n- Ø´Ø¬Ù‘Ø¹ Ø¹Ù„Ù‰ ØªØ¹Ù…ÙŠÙ‚ Ø§Ù„Ø¥ÙŠÙ…Ø§Ù† ÙˆØ§Ù„Ø«Ù‚Ø© Ø¨Ø§Ù„Ù„Ù‡.\n- ØªØ¬Ù†Ù‘Ø¨ Ø£ÙŠ Ù„Ù‡Ø¬Ø© Ù„Ø§Ù‡ÙˆØªÙŠØ© Ø·Ø§Ø¦ÙÙŠØ©.\nØ¨Ø¹Ø¯ Ø°Ù„ÙƒØŒ Ø§ÙƒØªØ¨ 2-3 Ø£Ø³Ø¦Ù„Ø© Ø¹Ù…ÙŠÙ‚Ø© ØªØ³Ø§Ø¹Ø¯ Ø§Ù„Ù‚Ø§Ø±Ø¦ Ø¹Ù„Ù‰ Ø§Ù„ØµÙ„Ø§Ø© Ø¨Ù‡Ø°Ù‡ Ø§Ù„Ø¢ÙŠØ© Ù…Ù† Ù‚Ù„Ø¨Ù‡`;
     } else if (lang === 'de') {
-      return `Schreibe eine Reflexion (4–6 Sätze) über diesen Bibelvers: ${reference}\n- Zeige, wie der Vers auf Jesus Christus und das Evangelium hinweist.\n- Erkläre, wie dieser Vers Gottes Herz offenbart.\n- Mache die Reflexion praktisch für das tägliche christliche Leben.\n- Ermutige zu tieferem Glauben und Vertrauen in Gott.\n- Vermeide konfessionelle Theologie.\nSchreibe anschließend 2–3 nachdenkliche Fragen, die dem Leser helfen, diesen Vers persönlich im Gebet zu bewegen.`;
+      return `Schreibe eine Reflexion (4â€“6 SÃ¤tze) Ã¼ber diesen Bibelvers: ${reference}\n- Zeige, wie der Vers auf Jesus Christus und das Evangelium hinweist.\n- ErklÃ¤re, wie dieser Vers Gottes Herz offenbart.\n- Mache die Reflexion praktisch fÃ¼r das tÃ¤gliche christliche Leben.\n- Ermutige zu tieferem Glauben und Vertrauen in Gott.\n- Vermeide konfessionelle Theologie.\nSchreibe anschlieÃŸend 2â€“3 nachdenkliche Fragen, die dem Leser helfen, diesen Vers persÃ¶nlich im Gebet zu bewegen.`;
     }
-    return `Write a Reflection (4–6 sentences) on this Bible verse: ${reference}\n- Point to Jesus Christ and the Gospel.\n- Show how the verse reveals God's heart.\n- Make it practical for daily Christian living.\n- Encourage deeper faith and trust in God.\n- Avoid denominational theology.\nThen, write 2–3 thoughtful questions to help the reader pray this verse from their heart.`;
+    return `Write a Reflection (4â€“6 sentences) on this Bible verse: ${reference}\n- Point to Jesus Christ and the Gospel.\n- Show how the verse reveals God's heart.\n- Make it practical for daily Christian living.\n- Encourage deeper faith and trust in God.\n- Avoid denominational theology.\nThen, write 2â€“3 thoughtful questions to help the reader pray this verse from their heart.`;
   };
 
   if (loading) {
@@ -268,7 +243,6 @@ export default function DailyVersePage() {
 
   const currentVerseText = getVerseText(todayVerse);
   const currentReflection = getReflection(todayVerse);
-  const currentPrayer = getPrayer(todayVerse);
   const currentVersion = getVersion(todayVerse);
 
   const arabicCopyText = arabicVerse ? formatCopyText(arabicVerse, todayVerse.reference, '') : '';
@@ -296,7 +270,7 @@ export default function DailyVersePage() {
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            العربية
+            Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©
           </button>
           <button
             onClick={() => setLanguage('de')}
@@ -319,7 +293,7 @@ export default function DailyVersePage() {
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-800">
-                {language === 'ar' ? 'آية اليوم' : language === 'de' ? 'Heutiger Vers' : "Today's Verse"}
+                {language === 'ar' ? 'Ø¢ÙŠØ© Ø§Ù„ÙŠÙˆÙ…' : language === 'de' ? 'Heutiger Vers' : "Today's Verse"}
               </h2>
               <p className="text-sm text-gray-600">
                 {new Date().toLocaleDateString(language === 'ar' ? 'ar-EG' : language === 'de' ? 'de-DE' : 'en-US', {
@@ -373,7 +347,7 @@ export default function DailyVersePage() {
                 <p className="text-sm text-blue-600 mb-3 text-left">
                   {todayVerse.reference} (Arabic)
                 </p>
-                <CopyButton text={arabicCopyText} label="نسخ الآية" className="w-full" />
+                <CopyButton text={arabicCopyText} label="Ù†Ø³Ø® Ø§Ù„Ø¢ÙŠØ©" className="w-full" />
               </div>
             )}
           </div>
@@ -418,9 +392,21 @@ export default function DailyVersePage() {
           <ReadInContext verseReference={todayVerse.reference} language={language} />
         </div>
 
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-md p-6 md:p-8">
+          <div className="flex items-center gap-3 mb-4">
+            <Heart className="w-5 h-5 text-blue-600" />
+            <h3 className="text-lg font-bold text-gray-800">
+              {language === 'ar' ? 'Ø§Ù„ØªØ£Ù…Ù„ Ø§Ù„ÙŠÙˆÙ…ÙŠ' : language === 'de' ? 'TÃ¤gliche Reflexion' : 'Daily Reflection'}
+            </h3>
+          </div>
+          <p className={`text-gray-700 leading-relaxed whitespace-pre-line ${language === 'ar' ? 'text-right' : ''}`}>
+            {currentReflection}
+          </p>
+        </div>
+
         <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
           <h3 className="font-semibold text-lg text-gray-800">
-            {language === 'ar' ? 'تأملك الشخصي' : language === 'de' ? 'Ihre persönliche Reflexion' : 'Your Personal Reflection'}
+            {language === 'ar' ? 'ØªØ£Ù…Ù„Ùƒ Ø§Ù„Ø´Ø®ØµÙŠ' : language === 'de' ? 'Ihre persÃ¶nliche Reflexion' : 'Your Personal Reflection'}
           </h3>
           
           <button
@@ -428,7 +414,7 @@ export default function DailyVersePage() {
             className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all"
           >
             <Lightbulb className="w-5 h-5" />
-            <span>{language === 'ar' ? 'اكتب لي تأملاً' : language === 'de' ? 'Schreibe mir eine Reflexion' : 'Write me a reflection'}</span>
+            <span>{language === 'ar' ? 'Ø§ÙƒØªØ¨ Ù„ÙŠ ØªØ£Ù…Ù„Ø§Ù‹' : language === 'de' ? 'Schreibe mir eine Reflexion' : 'Write me a reflection'}</span>
           </button>
 
           {showReflectionLinks && (
@@ -439,7 +425,7 @@ export default function DailyVersePage() {
                 rel="noopener noreferrer"
                 className="flex items-center justify-between p-3 bg-white hover:bg-purple-100 rounded-lg transition-colors"
               >
-                <span className="text-purple-700 font-medium">في العربية</span>
+                <span className="text-purple-700 font-medium">ÙÙŠ Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©</span>
                 <MessageCircle className="w-4 h-4 text-purple-600" />
               </a>
               <a
@@ -466,7 +452,7 @@ export default function DailyVersePage() {
           <textarea
             value={reflectionText}
             onChange={(e) => setReflectionText(e.target.value)}
-            placeholder={language === 'ar' ? 'اكتب أفكارك وصلواتك وتأملاتك هنا...' : language === 'de' ? 'Schreiben Sie hier Ihre Gedanken, Gebete und Reflexionen...' : 'Write your thoughts, prayers, and reflections here...'}
+            placeholder={language === 'ar' ? 'Ø§ÙƒØªØ¨ Ø£ÙÙƒØ§Ø±Ùƒ ÙˆØµÙ„ÙˆØ§ØªÙƒ ÙˆØªØ£Ù…Ù„Ø§ØªÙƒ Ù‡Ù†Ø§...' : language === 'de' ? 'Schreiben Sie hier Ihre Gedanken, Gebete und Reflexionen...' : 'Write your thoughts, prayers, and reflections here...'}
             className={`w-full h-40 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${language === 'ar' ? 'text-right' : ''}`}
           />
           <div className="flex flex-col sm:flex-row gap-3">
@@ -477,7 +463,7 @@ export default function DailyVersePage() {
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all"
             >
               <MessageCircle size={18} />
-              <span>{language === 'ar' ? 'مشاركة في حائط المجد' : language === 'de' ? 'Auf Glory Wall teilen' : 'Share to Glory Wall'}</span>
+              <span>{language === 'ar' ? 'Ù…Ø´Ø§Ø±ÙƒØ© ÙÙŠ Ø­Ø§Ø¦Ø· Ø§Ù„Ù…Ø¬Ø¯' : language === 'de' ? 'Auf Glory Wall teilen' : 'Share to Glory Wall'}</span>
             </a>
           </div>
         </div>
@@ -501,7 +487,7 @@ export default function DailyVersePage() {
           <div className="flex items-center gap-3 mb-6">
             <Calendar className="w-6 h-6 text-blue-600" />
             <h2 className="text-2xl font-bold text-gray-800">
-              {language === 'ar' ? 'الآيات الأخيرة' : language === 'de' ? 'Letzte Verse' : 'Recent Verses'}
+              {language === 'ar' ? 'Ø§Ù„Ø¢ÙŠØ§Øª Ø§Ù„Ø£Ø®ÙŠØ±Ø©' : language === 'de' ? 'Letzte Verse' : 'Recent Verses'}
             </h2>
           </div>
 
@@ -538,7 +524,7 @@ export default function DailyVersePage() {
 
                   <CopyButton
                     text={verseCopyText}
-                    label={language === 'ar' ? 'نسخ' : language === 'de' ? 'Kopieren' : 'Copy'}
+                    label={language === 'ar' ? 'Ù†Ø³Ø®' : language === 'de' ? 'Kopieren' : 'Copy'}
                     className="w-full"
                   />
                 </div>
