@@ -137,7 +137,7 @@ export default function DailyVersePage() {
       // Try with English name first for the Bible API
       let verse = await fetchVerseByReference(
         TRANSLATION_IDS.arabic,
-        book.englishName,
+        book.arabicName,
         parsed.chapter,
         parsed.verse
       );
