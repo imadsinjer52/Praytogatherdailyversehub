@@ -17,6 +17,7 @@ import GoDeeperSection from '../components/GoDeeperSection';
 import CopyButton from '../components/CopyButton';
 import DiveInTheWord from '../components/DiveInTheWord';
 import ReadInContext from '../components/ReadInContext';
+import ScrollToTop from '../components/ScrollToTop';
 
 type Language = 'en' | 'ar' | 'de';
 
@@ -189,7 +190,9 @@ export default function BibleStudyToolsPage() {
     : '';
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <>
+      <ScrollToTop />
+      <div className="max-w-4xl mx-auto space-y-6">
       <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">
           {language === 'ar' ? 'أدوات دراسة الكتاب المقدس' : language === 'de' ? 'Bibelstudien-Tools' : 'Bible Study Tools'}
@@ -405,6 +408,11 @@ export default function BibleStudyToolsPage() {
               className={`w-full h-40 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${language === 'ar' ? 'text-right' : ''}`}
             />
             <div className="flex flex-col sm:flex-row gap-3">
+              <CopyButton
+                text={formatCopyText(verseTextOnly, verseResult.reference, reflectionText)}
+                label={language === 'ar' ? 'نسخ التأمل' : language === 'de' ? 'Reflexion kopieren' : 'Copy Reflection'}
+                className="flex-1"
+              />
               <a
                 href="https://pray-to-gather.base44.app/GloryWall"
                 target="_blank"
@@ -415,6 +423,9 @@ export default function BibleStudyToolsPage() {
                 <span>{language === 'ar' ? 'مشاركة في حائط المجد' : language === 'de' ? 'Auf Glory Wall teilen' : 'Share to Glory Wall'}</span>
               </a>
             </div>
+            <p className="text-sm text-gray-600 mt-2">
+              {language === 'ar' ? '💡 نصيحة: انسخ تأملك أولًا لتتمكن من لصقه بسهولة على حائط المجد.' : language === 'de' ? '💡 Tipp: Kopiere zuerst deine Reflexion, damit du sie leicht auf der Glory Wall einfügen kannst.' : '💡 Pro tip: Copy your reflection first so you can easily paste it on the Glory Wall.'}
+            </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -425,6 +436,7 @@ export default function BibleStudyToolsPage() {
           <GoDeeperSection verseText={verseTextOnly} verseReference={verseResult.reference} language={language} />
         </>
       )}
-    </div>
+      </div>
+    </>
   );
 }

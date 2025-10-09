@@ -9,6 +9,7 @@ import CopyButton from '../components/CopyButton';
 import GoDeeperSection from '../components/GoDeeperSection';
 import DiveInTheWord from '../components/DiveInTheWord';
 import ReadInContext from '../components/ReadInContext';
+import ScrollToTop from '../components/ScrollToTop';
 
 type Language = 'en' | 'ar' | 'de';
 
@@ -275,7 +276,9 @@ export default function DailyVersePage() {
   const germanCopyText = germanVerse ? formatCopyText(germanVerse, todayVerse.reference, '') : '';
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <>
+      <ScrollToTop />
+      <div className="max-w-4xl mx-auto space-y-8">
       <div className="bg-white rounded-xl shadow-md p-4">
         <div className="flex items-center justify-center gap-2">
           <button
@@ -415,7 +418,10 @@ export default function DailyVersePage() {
             )}
           </div>
 
-          <ReadInContext verseReference={todayVerse.reference} language={language} />
+          <div className="grid md:grid-cols-2 gap-4 mt-4">
+            <DiveInTheWord verseReference={todayVerse.reference} language={language} />
+            <ReadInContext verseReference={todayVerse.reference} language={language} />
+          </div>
         </div>
 
         <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
@@ -470,6 +476,17 @@ export default function DailyVersePage() {
             className={`w-full h-40 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${language === 'ar' ? 'text-right' : ''}`}
           />
           <div className="flex flex-col sm:flex-row gap-3">
+            <CopyButton
+              text={formatCopyText(
+                language === 'ar' ? (arabicVerse || todayVerse.verseTextAr) :
+                language === 'de' ? (germanVerse || todayVerse.verseTextDe) :
+                todayVerse.verseTextEn,
+                todayVerse.reference,
+                reflectionText
+              )}
+              label={language === 'ar' ? 'نسخ التأمل' : language === 'de' ? 'Reflexion kopieren' : 'Copy Reflection'}
+              className="flex-1"
+            />
             <a
               href="https://pray-to-gather.base44.app/GloryWall"
               target="_blank"
@@ -480,12 +497,11 @@ export default function DailyVersePage() {
               <span>{language === 'ar' ? 'مشاركة في حائط المجد' : language === 'de' ? 'Auf Glory Wall teilen' : 'Share to Glory Wall'}</span>
             </a>
           </div>
+          <p className="text-sm text-gray-600 mt-2">
+            {language === 'ar' ? '💡 نصيحة: انسخ تأملك أولًا لتتمكن من لصقه بسهولة على حائط المجد.' : language === 'de' ? '💡 Tipp: Kopiere zuerst deine Reflexion, damit du sie leicht auf der Glory Wall einfügen kannst.' : '💡 Pro tip: Copy your reflection first so you can easily paste it on the Glory Wall.'}
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <DiveInTheWord verseReference={todayVerse.reference} language={language} />
-          <ReadInContext verseReference={todayVerse.reference} language={language} />
-        </div>
 
         <GoDeeperSection 
           verseText={currentVerseText} 
@@ -510,7 +526,10 @@ export default function DailyVersePage() {
               const verseText = getVerseText(verse);
               const reflection = getReflection(verse);
               const version = getVersion(verse);
-              const verseCopyText = formatCopyText(verseText, verse.reference, reflection);
+
+              const enCopyText = formatCopyText(verse.verseTextEn, verse.reference, '');
+              const arCopyText = formatCopyText(verse.verseTextAr, verse.reference, '');
+              const deCopyText = formatCopyText(verse.verseTextDe, verse.reference, '');
 
               return (
                 <div key={index} className="bg-white rounded-xl shadow-md p-6">
@@ -536,17 +555,32 @@ export default function DailyVersePage() {
                     </p>
                   </div>
 
-                  <CopyButton
-                    text={verseCopyText}
-                    label={language === 'ar' ? 'نسخ' : language === 'de' ? 'Kopieren' : 'Copy'}
-                    className="w-full"
-                  />
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <CopyButton
+                        text={enCopyText}
+                        label="Copy EN"
+                        className="flex-1"
+                      />
+                      <CopyButton
+                        text={arCopyText}
+                        label="نسخ AR"
+                        className="flex-1"
+                      />
+                      <CopyButton
+                        text={deCopyText}
+                        label="Kopieren DE"
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
                 </div>
               );
             })}
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

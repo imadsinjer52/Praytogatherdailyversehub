@@ -120,11 +120,16 @@ export default function GoDeeperSection({ verseText, verseReference, language, a
                     ))}
                   </div>
 
-                  <CopyButton 
-                    text={copyText} 
-                    label={catLanguage === 'ar' ? 'نسخ الأسئلة' : catLanguage === 'de' ? 'Fragen kopieren' : 'Copy Questions'} 
-                    className="w-full" 
-                  />
+                  <div className="space-y-2">
+                    <CopyButton
+                      text={copyText}
+                      label={catLanguage === 'ar' ? 'نسخ الأسئلة' : catLanguage === 'de' ? 'Fragen kopieren' : 'Copy Questions'}
+                      className="w-full"
+                    />
+                    <p className="text-sm text-gray-600">
+                      {catLanguage === 'ar' ? '💡 نصيحة: الصق هذه الأسئلة في قسم تأملك الشخصي أدناه لتجيب عليها جميعًا في مكان واحد' : catLanguage === 'de' ? '💡 Tipp: Füge die Fragen unten im Bereich Persönliche Reflexion ein, um sie alle an einem Ort zu beantworten.' : '💡 Pro tip: Paste the questions into the Personal Reflection section below to answer them all in one place.'}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
@@ -165,6 +170,9 @@ export default function GoDeeperSection({ verseText, verseReference, language, a
             <span>{language === 'ar' ? 'مشاركة في حائط المجد' : language === 'de' ? 'Auf Glory Wall teilen' : 'Share to Glory Wall'}</span>
           </a>
         </div>
+        <p className="text-sm text-gray-600 mt-2">
+          {language === 'ar' ? '💡 نصيحة: انسخ تأملك أولًا لتتمكن من لصقه بسهولة على حائط المجد.' : language === 'de' ? '💡 Tipp: Kopiere zuerst deine Reflexion, damit du sie leicht auf der Glory Wall einfügen kannst.' : '💡 Pro tip: Copy your reflection first so you can easily paste it on the Glory Wall.'}
+        </p>
       </div>
     </div>
   );
