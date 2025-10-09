@@ -181,7 +181,7 @@ export default function DailyVersePage() {
       // Try with English name first for the Bible API
       let verse = await fetchVerseByReference(
         TRANSLATION_IDS.german,
-        book.englishName,
+        book.germanName,
         parsed.chapter,
         parsed.verse
       );
