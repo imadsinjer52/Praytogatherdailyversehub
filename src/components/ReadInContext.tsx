@@ -19,12 +19,12 @@ const translations: BibleTranslation[] = [
   { id: 101, name: 'Ketab Al Hayat', nameAr: 'كتاب الحياة', nameDe: ' Ketab Al Hayat' },
    { id: 195, name: 'Easy Arabic Standard', nameAr: 'ترجمة العربية المبسطة', nameDe: ' Einfach Arabisch' },
   { id: 877, name: 'German - Bibel.Heute', nameAr: ' ألماني - Bibel Heute', nameDe: ' Bibel Heute' },
-  { id: 175, name: 'German - Schlachter', nameAr: ' ألماني - Schlachter', nameDe: ' Schlachter' },
+  { id: 157, name: 'German - Schlachter', nameAr: ' ألماني - Schlachter', nameDe: ' Schlachter' },
   { id: 111, name: 'New International Version', nameAr: 'النسخة الدولية الجديدة', nameDe: 'Neue Internationale Version' },
   { id: 59, name: 'ESV', nameAr: ' إنجليزي - ESV', nameDe: ' ESV' },
-{ id: 111, name: 'NASB', nameAr: ' إنجليزي - NASB', nameDe: ' NASB' },
+{ id: 2692, name: 'NASB', nameAr: ' إنجليزي - NASB', nameDe: ' NASB' },
 { id: 1713, name: 'CSB', nameAr: ' إنجليزي - CSB', nameDe: ' CSB' },
-{ id: 243, name: 'Easy English Bible', nameAr: ' إنجليزي - Easy English Bible', nameDe: ' Easy English Bible' },
+{ id: 2079, name: 'Easy English Bible', nameAr: ' إنجليزي - Easy English Bible', nameDe: ' Easy English Bible' },
 { id: 116, name: 'NLT', nameAr: ' إنجليزي - NLT', nameDe: ' NLT' }
 ];
 
