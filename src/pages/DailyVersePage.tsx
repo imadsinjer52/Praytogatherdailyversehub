@@ -62,6 +62,17 @@ export default function DailyVersePage() {
     }
   }, [todayVerse]);
 
+  useEffect(() => {
+    if (todayVerse && arabicVerse && germanVerse) {
+      const updatedVerse = {
+        ...todayVerse,
+        verseTextAr: arabicVerse,
+        verseTextDe: germanVerse,
+      };
+      saveVerse(updatedVerse);
+    }
+  }, [arabicVerse, germanVerse]);
+
   const parseVerseReference = (reference: string) => {
     const match = reference.match(/^(.+?)\s+(\d+):(\d+)/);
     if (!match) return null;
@@ -524,7 +535,6 @@ export default function DailyVersePage() {
           <div className="grid gap-6">
             {recentVerses.slice(1).map((verse, index) => {
               const verseText = getVerseText(verse);
-              const reflection = getReflection(verse);
               const version = getVersion(verse);
 
               const enCopyText = formatCopyText(verse.verseTextEn, verse.reference, '');
@@ -542,18 +552,12 @@ export default function DailyVersePage() {
                     })}
                   </p>
 
-                  <p className={`text-lg text-gray-800 leading-relaxed mb-3 italic ${language === 'ar' ? 'text-right' : ''}`}>
+                  <p className={`text-lg text-gray-800 leading-relaxed mb-4 italic ${language === 'ar' ? 'text-right' : ''}`}>
                     "{verseText}"
                   </p>
                   <p className={`text-blue-600 font-semibold mb-4 ${language === 'ar' ? 'text-left' : 'text-right'}`}>
                     {verse.reference} ({version})
                   </p>
-
-                  <div className="bg-blue-50 rounded-lg p-4 mb-4">
-                    <p className={`text-sm text-gray-700 leading-relaxed ${language === 'ar' ? 'text-right' : ''}`}>
-                      {reflection.slice(0, 200)}...
-                    </p>
-                  </div>
 
                   <div className="space-y-2">
                     <div className="flex gap-2">
