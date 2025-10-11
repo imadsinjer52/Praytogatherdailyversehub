@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState, useEffect, createContext, useContext } from 'react';
 import DailyVerse from './pages/DailyVersePage';
-import BibleStudyTools from './pages/BibleStudyTools';
+import BibleStudyTools from './pages/BibleStudyToolsPage';
 
 // Theme context
 type Theme = 'light' | 'dark';
