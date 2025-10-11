@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Search, BookOpen, Sparkles, Loader } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useAppContext } from '../App';
