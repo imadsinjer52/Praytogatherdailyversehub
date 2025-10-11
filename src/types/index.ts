@@ -1,36 +1,33 @@
-export type Theme = 'light' | 'dark';
-export type Language = 'en' | 'ar' | 'de';
+export interface DailyVerse {
+  reference: string;
+  text: string;
+  version: string;
+}
 
 export interface Verse {
-  id: string;
-  english_text: string;
-  arabic_text: string;
-  german_text: string;
   reference: string;
-  created_at: string;
+  text: string;
+  book: string;
+  chapter: number;
+  verses: string;
 }
 
-export interface RecentVerse extends Verse {
-  isFavorite?: boolean;
-}
+export type Language = 'en' | 'ar';
 
-export interface Analysis {
-  summary: string;
-  keyThemes: string[];
-  practicalApplication: string;
-  prayerPoints: string[];
-}
+export type PromptCategory =
+  | 'life-application'
+  | 'heart-mind-action'
+  | 'real-life'
+  | 'deeper-dive'
+  | 'prayer-oriented'
+  | 'acts'
+  | 'soap'
+  | 'pray'
+  | '5wh'
+  | 'grow';
 
-export interface AppContextType {
-  theme: Theme;
-  toggleTheme: () => void;
+export interface GeneratedPrompts {
+  category: PromptCategory;
   language: Language;
-  setLanguage: (lang: Language) => void;
+  questions: string[];
 }
-
-export interface LanguageConfig {
-  name: string;
-  flag: string;
-}
-
-export type LanguagesConfig = Record<Language, LanguageConfig>;
